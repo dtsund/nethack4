@@ -635,15 +635,62 @@ you_moved(void)
                 }
             }
 
-            if ((u.uen < u.uenmax) &&
-                ((wtcap < MOD_ENCUMBER &&
-                  (!(moves %
-                     ((MAXULEV + 8 -
-                       u.ulevel) * (Role_if(PM_WIZARD) ? 3 : 4) / 6))))
-                 || Energy_regeneration)) {
-                u.uen += rn1((int)(ACURR(A_WIS) + ACURR(A_INT)) / 15 + 1, 1);
-                if (u.uen > u.uenmax)
-                    u.uen = u.uenmax;
+            //New power regeneration algorithm.  Unlike the old algorithm,
+            //this one is role- and level-independent but based heavily on Wis
+            //(and Wizards get the most Wis).
+            //The algorithm is intended to make even small increases in Wisdom
+            //important to any character interested in spellcasting, at all
+            //levels of Wisdom.
+            //It is also meant to allow certain roles (especially Wizards) lean
+            //much more heavily on spellcasting in the early game.
+            //The algorithm does not involve Int at all.  This is deliberate.
+            //At Wisdom 12, regenerate exactly 1 Pw every 12 turns.
+            //For each point of Wisdom *above* 12, decrease the required number
+            //of turns by one, up to a cap of one Pw every 4 turns at Wisdom 20
+            //(attained by high-Wis Elves and non-Elves wearing a modestly
+            //enchanted helm of brilliance).  Pw regeneration can be further
+            //increased by pumping Wis up to 22 (requires a helm of brillance
+            //for anyone; virtually unattainable by orcs), for 1 Pw every 3
+            //turns.
+            //Below Wisdom 12, increase the number of turns for each point of
+            //regeneration by 20% compounded, rounding up.
+            //Thus, at Wisdom 4, regenerate a point of Pw once every 52 turns.
+            //Below Wisdom 4, power does not naturally regenerate.
+            //Of course, with the Eye of the Aethiopica, regenerate every turn.
+            if ((u.uen < u.uenmax) && (wtcap < MOD_ENCUMBER)) {
+                int turns_for_pw = 12;
+                if(Energy_regeneration) {
+                    turns_for_pw = 1;
+                } else if(ACURR(A_WIS) >= 22) {
+                    turns_for_pw = 3;
+                } else if(ACURR(A_WIS) >= 20) {
+                    turns_for_pw = 4;
+                } else if(ACURR(A_WIS) >= 12) {
+                    turns_for_pw = 24 - ACURR(A_WIS);
+                } else if(ACURR(A_WIS) >= 4) {
+                    //I distrust floating-point arithmetic where it isn't
+                    //absolutely necessary, and math.h exp is floating-point.
+                    int num = 1;
+                    int denom = 1;
+                    int i;
+                    for(i = 0; i < 12 - ACURR(A_WIS); i++){
+                        num *= 6;
+                        denom *= 5;
+                    }
+                    
+                    turns_for_pw = (12 * num) / denom;
+                } else {
+                    //Don't regenerate energy at all.
+                    turns_for_pw = -1;
+                }
+                
+                //This check here will mean some players will miss a point here
+                //or there right after a Wisdom change.  Fixing this would be
+                //slightly nontrivial and likely not worth it.
+                if (turns_for_pw > 0 && moves % turns_for_pw == 0) {
+                    //Regenerate 1d2 Pw with the Eye.
+                    u.uen += (Energy_regeneration ? rn1(2,1) : 1);
+                }
             }
 
             if (!u.uinvulnerable) {
