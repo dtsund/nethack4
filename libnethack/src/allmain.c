@@ -670,8 +670,9 @@ you_moved(void)
                 } else if(ACURR(A_WIS) >= 4) {
                     //I distrust floating-point arithmetic where it isn't
                     //absolutely necessary, and math.h exp is floating-point.
-                    int num = 1;
-                    int denom = 1;
+                    //Longs in case of archaic architectures ("archaitectures")
+                    long num = 1;
+                    long denom = 1;
                     int i;
                     for(i = 0; i < 12 - ACURR(A_WIS); i++){
                         num *= 6;
