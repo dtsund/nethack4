@@ -688,7 +688,7 @@ spell_backfire(int spell)
 int
 spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
 {
-    int energy, damage, chance, n, intell;
+    int energy, damage, chance, n, intell, hungr;
     int skill, role_skill;
     boolean confused = (Confusion != 0);
     struct obj *pseudo;
@@ -735,7 +735,7 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
         pline("You don't have enough energy to cast that spell.");
         return 0;
     } else {
-        int hungr = energy * 2;
+        hungr = energy * 2;
 
         /* If hero is a wizard, their current intelligence (bonuses +
            temporary + current) affects hunger reduction in casting a
@@ -772,7 +772,10 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
            casting anything else except detect food */
         if (hungr > u.uhunger - 3)
             hungr = u.uhunger - 3;
-        morehungry(hungr);
+        //Don't actually deduct the hunger just yet; it's possible that the
+        //player will abort the spell.
+        //Rather, deduct it right before returning after we know we went
+        //through with it.
         }
     }
 
@@ -780,10 +783,10 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     if (confused || (rnd(100) > chance)) {
         pline("You fail to cast the spell correctly.");
         u.uen -= energy / 2;
+        morehungry(hungr);
         return 1;
     }
 
-    u.uen -= energy;
     exercise(A_WIS, TRUE);
     /* pseudo is a temporary "false" object containing the spell stats */
     pseudo = mksobj(level, spellid(spell), FALSE, FALSE);
@@ -834,6 +837,10 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
                         dy = cc.y;
                     }
                 }
+            } else {
+                //No good location; abort.
+                pline("Suit yourself.");
+                return 0;
             }
             break;
         }
@@ -862,10 +869,9 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
             if (atme)
                 dx = dy = dz = 0;
             else if (!getargdir(arg, NULL, &dx, &dy, &dz)) {
-                /* getdir cancelled, generate a random direction */
-                dz = 0;
-                confdir(&dx, &dy);
-                pline("The magical energy is released!");
+                /* getdir cancelled, abort */
+                pline("Suit yourself.");
+                return 0;
             }
             if (!dx && !dy && !dz) {
                 if ((damage = zapyourself(pseudo, TRUE)) != 0) {
@@ -944,6 +950,9 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     use_skill(skill, spellev(spell));
 
     obfree(pseudo, NULL);       /* now, get rid of it */
+    //Deduct the spell's costs, now that we know the spell was actually cast
+    morehungry(hungr);
+    u.uen -= energy;
     return 1;
 }
 
@@ -964,7 +973,7 @@ throwspell(schar *dx, schar *dy, const struct nh_cmd_arg *arg)
     pline("Where do you want to cast the spell?");
     cc.x = u.ux;
     cc.y = u.uy;
-    if (getargpos(arg, &cc, TRUE, "the desired position") == NHCR_CLIENT_CANCEL)
+    if (getargpos(arg, &cc, FALSE, "the desired position") == NHCR_CLIENT_CANCEL)
         return 0;       /* user pressed ESC */
     /* The number of moves from hero to where the spell drops. */
     if (distmin(u.ux, u.uy, cc.x, cc.y) > 10) {
