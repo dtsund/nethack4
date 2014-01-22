@@ -690,6 +690,9 @@ you_moved(void)
                 if (turns_for_pw > 0 && moves % turns_for_pw == 0) {
                     //Regenerate 1d2 Pw with the Eye.
                     u.uen += (Energy_regeneration ? rn1(2,1) : 1);
+                    //...but don't go over the maximum.
+                    if (u.uen > u.uenmax)
+                        u.uen = u.uenmax;
                 }
             }
 
