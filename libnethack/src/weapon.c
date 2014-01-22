@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-12-31 */
+/* Last modified by Derrick Sund, 2013-01-22 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -20,12 +20,11 @@
 #define PN_HAMMER            (-6)
 #define PN_WHIP              (-7)
 #define PN_ATTACK_SPELL      (-8)
-#define PN_HEALING_SPELL     (-9)
+#define PN_DEFENSE_SPELL     (-9)
 #define PN_DIVINATION_SPELL  (-10)
 #define PN_ENCHANTMENT_SPELL (-11)
-#define PN_CLERIC_SPELL      (-12)
-#define PN_ESCAPE_SPELL      (-13)
-#define PN_MATTER_SPELL      (-14)
+#define PN_ESCAPE_SPELL      (-12)
+#define PN_MATTER_SPELL      (-13)
 
 static void give_may_advance_msg(int);
 
@@ -40,9 +39,9 @@ static const short skill_names_indices[P_NUM_SKILLS] = {
     JAVELIN, TRIDENT, LANCE, BOW,
     SLING, CROSSBOW, DART,
     SHURIKEN, BOOMERANG, PN_WHIP, UNICORN_HORN,
-    PN_ATTACK_SPELL, PN_HEALING_SPELL,
+    PN_ATTACK_SPELL, PN_DEFENSE_SPELL,
     PN_DIVINATION_SPELL, PN_ENCHANTMENT_SPELL,
-    PN_CLERIC_SPELL, PN_ESCAPE_SPELL,
+    PN_ESCAPE_SPELL,
     PN_MATTER_SPELL,
     PN_BARE_HANDED, PN_TWO_WEAPONS,
     PN_RIDING
@@ -59,10 +58,9 @@ static const char *const odd_skill_names[] = {
     "hammer",
     "whip",
     "attack spells",
-    "healing spells",
+    "defense spells",
     "divination spells",
     "enchantment spells",
-    "clerical spells",
     "escape spells",
     "matter spells",
 };
@@ -1444,13 +1442,18 @@ skill_init(const struct def_skill *class_skill)
     }
 
     /* set skills for magic */
-    if (Role_if(PM_HEALER) || Role_if(PM_MONK)) {
-        P_SKILL(P_HEALING_SPELL) = P_BASIC;
+    if (Role_if(PM_BARBARIAN)) {
+        P_SKILL(P_ATTACK_SPELL) = P_BASIC;
+    } else if (Role_if(PM_HEALER)) {
+        P_SKILL(P_DEFENSE_SPELL) = P_BASIC;
+    } else if (Role_if(PM_MONK)) {
+        P_SKILL(P_DEFENSE_SPELL) = P_BASIC;
     } else if (Role_if(PM_PRIEST)) {
-        P_SKILL(P_CLERIC_SPELL) = P_BASIC;
+        P_SKILL(P_DEFENSE_SPELL) = P_BASIC;
     } else if (Role_if(PM_WIZARD)) {
         P_SKILL(P_ATTACK_SPELL) = P_BASIC;
         P_SKILL(P_ENCHANTMENT_SPELL) = P_BASIC;
+        P_SKILL(P_ESCAPE_SPELL) = P_BASIC;
     }
 
     /* walk through array to set skill maximums */

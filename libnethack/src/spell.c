@@ -582,14 +582,12 @@ spelltypemnemonic(int skill)
     switch (skill) {
     case P_ATTACK_SPELL:
         return "attack";
-    case P_HEALING_SPELL:
-        return "healing";
+    case P_DEFENSE_SPELL:
+        return "defense";
     case P_DIVINATION_SPELL:
         return "divination";
     case P_ENCHANTMENT_SPELL:
         return "enchantment";
-    case P_CLERIC_SPELL:
-        return "clerical";
     case P_ESCAPE_SPELL:
         return "escape";
     case P_MATTER_SPELL:
