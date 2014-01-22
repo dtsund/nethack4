@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2014-01-19 */
+/* Last modified by Derrick Sund, 2014-01-21 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985-1999. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -50,7 +50,7 @@ const struct Role roles[] = {
      ROLE_NEUTRAL,
      /* Str Int Wis Dex Con Cha */
      {7, 10, 10, 7, 7, 7},
-     {20, 20, 20, 10, 20, 10},
+     {20, 20, 30, 10, 10, 10},
      /* Init Lower Higher */
      {11, 0, 0, 8, 1, 0},       /* Hit points */
      {1, 0, 0, 1, 0, 1}, 14,    /* Energy */
@@ -73,8 +73,10 @@ const struct Role roles[] = {
      ART_HEART_OF_AHRIMAN,
      MH_HUMAN | MH_ORC | ROLE_MALE | ROLE_FEMALE | ROLE_NEUTRAL | ROLE_CHAOTIC,
      /* Str Int Wis Dex Con Cha */
-     {16, 7, 7, 15, 16, 6},
-     {30, 6, 7, 20, 30, 7},
+     {16, 16, 14, 10, 10, 6},
+     //Keep a tight rein on both Int and Wis; they should be able to use magic,
+     //but not spam it.
+     {30, 6, 0, 20, 30, 14},
      /* Init Lower Higher */
      {14, 0, 0, 10, 2, 0},      /* Hit points */
      {1, 0, 0, 1, 0, 1}, 10,    /* Energy */
@@ -146,8 +148,8 @@ const struct Role roles[] = {
      ART_MAGIC_MIRROR_OF_MERLIN,
      MH_HUMAN | ROLE_MALE | ROLE_FEMALE | ROLE_LAWFUL,
      /* Str Int Wis Dex Con Cha */
-     {13, 7, 14, 8, 10, 17},
-     {30, 15, 15, 10, 20, 10},
+     {13, 7, 7, 8, 10, 17},
+     {30, 15, 10, 10, 25, 10},
      /* Init Lower Higher */
      {14, 0, 0, 8, 2, 0},       /* Hit points */
      {1, 4, 0, 1, 0, 2}, 10,    /* Energy */
@@ -172,8 +174,8 @@ const struct Role roles[] = {
      MH_HUMAN | ROLE_MALE | ROLE_FEMALE | ROLE_LAWFUL | ROLE_NEUTRAL |
      ROLE_CHAOTIC,
      /* Str Int Wis Dex Con Cha */
-     {10, 7, 8, 8, 7, 7},
-     {25, 10, 20, 20, 15, 10},
+     {8, 12, 11, 8, 7, 7},
+     {25, 20, 10, 20, 15, 10},
      /* Init Lower Higher */
      {12, 0, 0, 8, 1, 0},       /* Hit points */
      {2, 2, 0, 2, 0, 2}, 10,    /* Energy */
@@ -223,7 +225,7 @@ const struct Role roles[] = {
      ART_MASTER_KEY_OF_THIEVERY,
      MH_HUMAN | MH_ORC | ROLE_MALE | ROLE_FEMALE | ROLE_CHAOTIC,
      /* Str Int Wis Dex Con Cha */
-     {7, 7, 7, 10, 7, 6},
+     {7, 14, 12, 10, 7, 6},
      {20, 10, 10, 30, 20, 10},
      /* Init Lower Higher */
      {10, 0, 0, 8, 1, 0},       /* Hit points */
@@ -345,8 +347,8 @@ const struct Role roles[] = {
      MH_HUMAN | MH_ELF | MH_GNOME | MH_ORC | ROLE_MALE | ROLE_FEMALE |
      ROLE_NEUTRAL | ROLE_CHAOTIC,
      /* Str Int Wis Dex Con Cha */
-     {7, 10, 7, 7, 7, 7},
-     {10, 30, 10, 20, 20, 10},
+     {7, 10, 10, 7, 7, 7},
+     {10, 30, 30, 10, 10, 10},
      /* Init Lower Higher */
      {10, 0, 0, 8, 1, 0},       /* Hit points */
      {4, 3, 0, 2, 0, 3}, 12,    /* Energy */
