@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-12-22 */
+/* Last modified by Derrick Sund, 2014-01-21 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -577,7 +577,7 @@ thrwmu(struct monst *mtmp)
 
     /* Multishot calculations */
     multishot = 1;
-    if ((ammo_and_launcher(otmp, mwep) || skill == P_DAGGER || skill == -P_DART
+    if ((ammo_and_launcher(otmp, mwep) || skill == -P_DART
          || skill == -P_SHURIKEN) && !mtmp->mconf) {
         /* Assumes lords are skilled, princes are expert */
         if (is_prince(mtmp->data))
@@ -588,10 +588,6 @@ thrwmu(struct monst *mtmp)
         switch (monsndx(mtmp->data)) {
         case PM_RANGER:
             multishot++;
-            break;
-        case PM_ROGUE:
-            if (skill == P_DAGGER)
-                multishot++;
             break;
         case PM_NINJA:
         case PM_SAMURAI:
@@ -783,7 +779,7 @@ thrwmm(struct monst *mtmp, struct monst *mdef)
 
     /* Multishot calculations */
     multishot = 1;
-    if ((ammo_and_launcher(otmp, mwep) || skill == P_DAGGER || skill == -P_DART
+    if ((ammo_and_launcher(otmp, mwep) || skill == -P_DART
          || skill == -P_SHURIKEN) && !mtmp->mconf) {
         /* Assumes lords are skilled, princes are expert */
         if (is_prince(mtmp->data))
@@ -794,10 +790,6 @@ thrwmm(struct monst *mtmp, struct monst *mdef)
         switch (monsndx(mtmp->data)) {
         case PM_RANGER:
             multishot++;
-            break;
-        case PM_ROGUE:
-            if (skill == P_DAGGER)
-                multishot++;
             break;
         case PM_NINJA:
         case PM_SAMURAI:

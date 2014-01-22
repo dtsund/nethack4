@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-01-21 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -97,7 +97,7 @@ throw_obj(struct obj *obj, const struct nh_cmd_arg *arg, boolean cancel_unquiver
 
     /* Multishot calculations */
     skill = objects[obj->otyp].oc_skill;
-    if ((ammo_and_launcher(obj, uwep) || skill == P_DAGGER || skill == -P_DART
+    if ((ammo_and_launcher(obj, uwep) || skill == -P_DART
          || skill == -P_SHURIKEN) && !(Confusion || Stunned)) {
         /* Bonus if the player is proficient in this weapon... */
         switch (P_SKILL(weapon_type(obj))) {
@@ -114,10 +114,6 @@ throw_obj(struct obj *obj, const struct nh_cmd_arg *arg, boolean cancel_unquiver
         switch (Role_switch) {
         case PM_RANGER:
             multishot++;
-            break;
-        case PM_ROGUE:
-            if (skill == P_DAGGER)
-                multishot++;
             break;
         case PM_SAMURAI:
             if (obj->otyp == YA && uwep && uwep->otyp == YUMI)
