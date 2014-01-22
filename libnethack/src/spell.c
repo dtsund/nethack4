@@ -937,8 +937,10 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
         cast_protection();
         break;
     case SPE_JUMPING:
-        if (!jump(&(struct nh_cmd_arg){.argtype = 0}, max(role_skill, 1)))
+        if (!jump(&(struct nh_cmd_arg){.argtype = 0}, max(role_skill, 1))) {
             pline("Nothing happens.");
+            return 0;
+        }
         break;
     default:
         impossible("Unknown spell %d attempted.", spell);
