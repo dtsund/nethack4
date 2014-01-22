@@ -404,19 +404,24 @@ exerchk(void)
     }
 }
 
-
+//Initialize player attributes.  np = total attribute cap; ideally, the sum of
+//the player attributes should sum to np after this function runs.
 void
 init_attr(int np)
 {
     int i, x, tryct;
 
-
+    //First, set player attributes according to the baseline stats according
+    //to the selected role.
     for (i = 0; i < A_MAX; i++) {
         ABASE(i) = AMAX(i) = urole.attrbase[i];
         ATEMP(i) = ATIME(i) = 0;
         np -= urole.attrbase[i];
     }
 
+    //If the sum of the attributes is still below np (and it probably is),
+    //increase random stats (choice weighted according to role) until
+    //we hit np.
     tryct = 0;
     while (np > 0 && tryct < 100) {
 
@@ -425,6 +430,7 @@ init_attr(int np)
         if (i >= A_MAX)
             continue;   /* impossible */
 
+        //Don't increase any stat over the maximum.
         if (ABASE(i) >= ATTRMAX(i)) {
 
             tryct++;
@@ -436,6 +442,10 @@ init_attr(int np)
         np--;
     }
 
+    //On the other hand, if the sum is *over* np, decrease random attributes
+    //until we hit np.  Weights are the same as above; the stats most likely
+    //to be added in the first case are also the ones most likely to be
+    //subtracted here.
     tryct = 0;
     while (np < 0 && tryct < 100) {     /* for redistribution */
 
@@ -444,6 +454,7 @@ init_attr(int np)
         if (i >= A_MAX)
             continue;   /* impossible */
 
+        //Don't decrease any stat below the minimum.
         if (ABASE(i) <= ATTRMIN(i)) {
 
             tryct++;
