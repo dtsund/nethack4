@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-01-22 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -421,7 +421,6 @@ peffects(struct obj *otmp)
 
     switch (otmp->otyp) {
     case POT_RESTORE_ABILITY:
-    case SPE_RESTORE_ABILITY:
         unkn++;
         if (otmp->cursed) {
             pline("Ulch!  This makes you feel mediocre!");

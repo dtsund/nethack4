@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-21 */
+/* Last modified by Derrick Sund, 2014-01-22 */
 /* Copyright (c) M. Stephenson 1988                               */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -714,7 +714,7 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     }
     energy = (spellev(spell) * 5);      /* 5 <= energy <= 35 */
 
-    if (u.uhunger <= 10 && spellid(spell) != SPE_DETECT_FOOD) {
+    if (u.uhunger <= 10) {
         pline("You are too hungry to cast that spell.");
         return 0;
     } else if (ACURR(A_STR) < 4) {
@@ -737,45 +737,44 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
         pline("You don't have enough energy to cast that spell.");
         return 0;
     } else {
-        if (spellid(spell) != SPE_DETECT_FOOD) {
-            int hungr = energy * 2;
+        int hungr = energy * 2;
 
-            /* If hero is a wizard, their current intelligence (bonuses +
-               temporary + current) affects hunger reduction in casting a
-               spell. 1. int = 17-18 no reduction 2. int = 16 1/4 hungr 3. int
-               = 15 1/2 hungr 4. int = 1-14 normal reduction The reason for
-               this is: a) Intelligence affects the amount of exertion in
-               thinking. b) Wizards have spent their life at magic and
-               understand quite well how to cast spells. */
-            intell = acurr(A_INT);
-            if (!Role_if(PM_WIZARD))
-                intell = 10;
-            switch (intell) {
-            case 25:
-            case 24:
-            case 23:
-            case 22:
-            case 21:
-            case 20:
-            case 19:
-            case 18:
-            case 17:
-                hungr = 0;
-                break;
-            case 16:
-                hungr /= 4;
-                break;
-            case 15:
-                hungr /= 2;
-                break;
-            }
-            /* don't put player (quite) into fainting from casting a spell,
-               particularly since they might not even be hungry at the
-               beginning; however, this is low enough that they must eat before
-               casting anything else except detect food */
-            if (hungr > u.uhunger - 3)
-                hungr = u.uhunger - 3;
-            morehungry(hungr);
+        /* If hero is a wizard, their current intelligence (bonuses +
+           temporary + current) affects hunger reduction in casting a
+           spell. 1. int = 17-18 no reduction 2. int = 16 1/4 hungr 3. int
+           = 15 1/2 hungr 4. int = 1-14 normal reduction The reason for
+           this is: a) Intelligence affects the amount of exertion in
+           thinking. b) Wizards have spent their life at magic and
+           understand quite well how to cast spells. */
+        intell = acurr(A_INT);
+        if (!Role_if(PM_WIZARD))
+            intell = 10;
+        switch (intell) {
+        case 25:
+        case 24:
+        case 23:
+        case 22:
+        case 21:
+        case 20:
+        case 19:
+        case 18:
+        case 17:
+            hungr = 0;
+            break;
+        case 16:
+            hungr /= 4;
+            break;
+        case 15:
+            hungr /= 2;
+            break;
+
+        /* don't put player (quite) into fainting from casting a spell,
+           particularly since they might not even be hungry at the
+           beginning; however, this is low enough that they must eat before
+           casting anything else except detect food */
+        if (hungr > u.uhunger - 3)
+            hungr = u.uhunger - 3;
+        morehungry(hungr);
         }
     }
 
@@ -887,7 +886,6 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
         /* these are all duplicates of scroll effects */
     case SPE_REMOVE_CURSE:
     case SPE_CONFUSE_MONSTER:
-    case SPE_DETECT_FOOD:
     case SPE_CAUSE_FEAR:
         /* high skill yields effect equivalent to blessed scroll */
         if (role_skill >= P_SKILLED)
@@ -905,17 +903,12 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     case SPE_DETECT_TREASURE:
     case SPE_DETECT_MONSTERS:
     case SPE_LEVITATION:
-    case SPE_RESTORE_ABILITY:
         /* high skill yields effect equivalent to blessed potion */
         if (role_skill >= P_SKILLED)
             pseudo->blessed = 1;
         /* fall through */
     case SPE_INVISIBILITY:
         peffects(pseudo);
-        break;
-
-    case SPE_CURE_BLINDNESS:
-        healup(0, 0, FALSE, TRUE);
         break;
     case SPE_CURE_SICKNESS:
         if (Sick)
@@ -1156,9 +1149,7 @@ percent_success(int spell)
 
     /* `healing spell' bonus */
     if (spellid(spell) == SPE_HEALING || spellid(spell) == SPE_EXTRA_HEALING ||
-        spellid(spell) == SPE_CURE_BLINDNESS ||
         spellid(spell) == SPE_CURE_SICKNESS ||
-        spellid(spell) == SPE_RESTORE_ABILITY ||
         spellid(spell) == SPE_REMOVE_CURSE)
         splcaster += special;
 

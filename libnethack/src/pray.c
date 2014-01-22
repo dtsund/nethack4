@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-01-22 */
 /* Copyright (c) Benson I. Margulies, Mike Stephenson, Steve Linhart, 1989. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -695,10 +695,15 @@ gcrownu(void)
                 break;
             }
     } else if (Role_if(PM_MONK) && (!uwep || !uwep->oartifact) &&
-               !carrying(SPE_RESTORE_ABILITY)) {
-        /* monks rarely wield a weapon */
-        class_gift = SPE_RESTORE_ABILITY;
-        goto make_splbk;
+               !carrying(HELM_OF_BRILLIANCE)) {
+        // monks rarely wield a weapon, but have use for spells
+        class_gift = HELM_OF_BRILLIANCE;
+        obj = mksobj(level, class_gift, TRUE, FALSE);
+        bless(obj);
+        obj->bknown = TRUE;
+        at_your_feet("A helmet");
+        dropy(obj);
+        u.ugifts++; //XXX TEST THIS WHEN PRAYER WORKS AGAIN
     }
 
     switch (u.ualign.type) {
