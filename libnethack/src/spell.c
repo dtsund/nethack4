@@ -1136,7 +1136,7 @@ percent_success(int spell)
 
     splcaster = urole.spelbase;
     special = urole.spelheal;
-    statused = ACURR(urole.spelstat);
+    statused = ACURR(A_INT);
 
     if (uarm && is_metallic(uarm))
         splcaster += (uarmc &&

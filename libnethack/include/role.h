@@ -78,7 +78,6 @@ struct Role {
     int spelheal;       /* penalty (-bonus) for healing spells */
     int spelshld;       /* penalty for wearing any shield */
     int spelarmr;       /* penalty for wearing metal armour */
-    int spelstat;       /* which stat (A_) is used */
 
         /*** Properties in variable-length arrays ***/
     /* intrinsics (see attrib.c) */

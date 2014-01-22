@@ -54,7 +54,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {11, 0, 0, 8, 1, 0},       /* Hit points */
      {1, 0, 0, 1, 0, 1}, 14,    /* Energy */
-     10, 5, 0, 2, 10, A_INT},
+     10, 5, 0, 2, 10},
     {{"Barbarian", 0}, {
                         {"Plunderer", "Plunderess"},
                         {"Pillager", 0},
@@ -80,7 +80,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {14, 0, 0, 10, 2, 0},      /* Hit points */
      {1, 0, 0, 1, 0, 1}, 10,    /* Energy */
-     10, 14, 0, 0, 8, A_INT},
+     10, 14, 0, 0, 8},
     {{"Caveman", "Cavewoman"}, {
                                 {"Troglodyte", 0},
                                 {"Aborigine", 0},
@@ -105,7 +105,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {14, 0, 0, 8, 2, 0},       /* Hit points */
      {1, 0, 0, 1, 0, 1}, 10,    /* Energy */
-     0, 12, 0, 1, 8, A_INT},
+     0, 12, 0, 1, 8},
     {{"Healer", 0}, {
                      {"Rhizotomist", 0},
                      {"Empiric", 0},
@@ -129,7 +129,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {11, 0, 0, 8, 1, 0},       /* Hit points */
      {1, 4, 0, 1, 0, 2}, 20,    /* Energy */
-     10, 3, -3, 2, 10, A_WIS},
+     10, 3, -3, 2, 10},
     {{"Knight", 0}, {
                      {"Gallant", 0},
                      {"Esquire", 0},
@@ -153,7 +153,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {14, 0, 0, 8, 2, 0},       /* Hit points */
      {1, 4, 0, 1, 0, 2}, 10,    /* Energy */
-     10, 8, -2, 0, 9, A_WIS},
+     10, 8, -2, 0, 9},
     {{"Monk", 0}, {
                    {"Candidate", 0},
                    {"Novice", 0},
@@ -179,7 +179,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {12, 0, 0, 8, 1, 0},       /* Hit points */
      {2, 2, 0, 2, 0, 2}, 10,    /* Energy */
-     10, 8, -2, 2, 20, A_WIS},
+     10, 8, -2, 2, 20},
     {{"Priest", "Priestess"}, {
                                {"Aspirant", 0},
                                {"Acolyte", 0},
@@ -204,7 +204,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {12, 0, 0, 8, 1, 0},       /* Hit points */
      {4, 3, 0, 2, 0, 2}, 10,    /* Energy */
-     0, 3, -2, 2, 10, A_WIS},
+     0, 3, -2, 2, 10},
     /* Note: Rogue precedes Ranger so that use of `-R' on the command line
        retains its traditional meaning. */
     {{"Rogue", 0}, {
@@ -230,7 +230,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {10, 0, 0, 8, 1, 0},       /* Hit points */
      {1, 0, 0, 1, 0, 1}, 11,    /* Energy */
-     10, 8, 0, 1, 9, A_INT},
+     10, 8, 0, 1, 9},
     {{"Ranger", 0}, {
                      {"Tenderfoot", 0},
                      {"Lookout", 0},
@@ -255,7 +255,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {13, 0, 0, 6, 1, 0},       /* Hit points */
      {1, 0, 0, 1, 0, 1}, 12,    /* Energy */
-     10, 9, 2, 1, 10, A_INT},
+     10, 9, 2, 1, 10},
     {{"Samurai", 0}, {
                       {"Hatamoto", 0},  /* Banner Knight */
                       {"Ronin", 0},     /* no allegiance */
@@ -279,7 +279,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {13, 0, 0, 8, 1, 0},       /* Hit points */
      {1, 0, 0, 1, 0, 1}, 11,    /* Energy */
-     10, 10, 0, 0, 8, A_INT},
+     10, 10, 0, 0, 8},
     {{"Tourist", 0}, {
                       {"Rambler", 0},
                       {"Sightseer", 0},
@@ -303,7 +303,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {8, 0, 0, 8, 0, 0},        /* Hit points */
      {1, 0, 0, 1, 0, 1}, 14,    /* Energy */
-     0, 5, 1, 2, 10, A_INT},
+     0, 5, 1, 2, 10},
     {{"Valkyrie", 0}, {
                        {"Stripling", 0},
                        {"Skirmisher", 0},
@@ -327,7 +327,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {14, 0, 0, 8, 2, 0},       /* Hit points */
      {1, 0, 0, 1, 0, 1}, 10,    /* Energy */
-     0, 10, -2, 0, 9, A_WIS},
+     0, 10, -2, 0, 9},
     {{"Wizard", 0}, {
                      {"Evoker", 0},
                      {"Conjurer", 0},
@@ -352,7 +352,7 @@ const struct Role roles[] = {
      /* Init Lower Higher */
      {10, 0, 0, 8, 1, 0},       /* Hit points */
      {4, 3, 0, 2, 0, 3}, 12,    /* Energy */
-     0, 1, 0, 3, 10, A_INT},
+     0, 1, 0, 3, 10},
 /* Array terminator */
     {{0, 0}}
 };
