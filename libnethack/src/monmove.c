@@ -331,7 +331,9 @@ dochug(struct monst *mtmp)
 
     /* Monsters that want to acquire things */
     /* may teleport, so do it before inrange is set */
-    if (is_covetous(mdat))
+    // Now restricted to Rodney only.  Formerly teleport-happy enemies
+    // might get buffed to compensate.
+    if (mdat == &mons[PM_WIZARD_OF_YENDOR])
         tactics(mtmp);
 
     /* check distance and scariness of attacks */
@@ -654,8 +656,8 @@ m_move(struct monst *mtmp, int after)
         mmoved = 0;
     }
 
-    /* and the acquisitive monsters get special treatment */
-    if (is_covetous(ptr)) {
+    /* and Rodney gets special treatment */
+    if (ptr == &mons[PM_WIZARD_OF_YENDOR]) {
         xchar tx = STRAT_GOALX(mtmp->mstrategy), ty =
             STRAT_GOALY(mtmp->mstrategy);
         struct monst *intruder = m_at(level, tx, ty);
@@ -725,12 +727,18 @@ not_special:
               ptr->mlet == S_LIGHT) && !rn2(3)))
             appr = 0;
 
+        //Non-Wizard covetous monsters may not have covetous teleportation
+        //anymore, but they're still really aggressive.
+        if (is_covetous(ptr))
+            appr = 1;
+
         if (monsndx(ptr) == PM_LEPRECHAUN && (appr == 1) &&
             ((lepgold = findgold(mtmp->minvent)) &&
              (lepgold->quan > ((ygold = findgold(invent)) ? ygold->quan : 0L))))
             appr = -1;
 
-        if (!should_see && can_track(ptr)) {
+        //...really, *really* aggressive.
+        if (!should_see && can_track(ptr) || is_covetous(ptr)) {
             coord *cp;
 
             cp = gettrack(omx, omy);
