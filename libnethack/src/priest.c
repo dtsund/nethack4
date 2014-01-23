@@ -476,7 +476,6 @@ priest_talk(struct monst *priest)
                 money2u(priest, pmoney > 1L ? 2 : 1);
             } else
                 pline("%s preaches the virtues of poverty.", Monnam(priest));
-            exercise(A_WIS, TRUE);
         } else
             pline("%s is not interested.", Monnam(priest));
         return;
@@ -493,8 +492,6 @@ priest_talk(struct monst *priest)
                 verbalize("Cheapskate.");
             else {
                 verbalize("I thank thee for thy contribution.");
-                /* give player some token */
-                exercise(A_WIS, TRUE);
             }
         } else if (offer < (u.ulevel * 400)) {
             verbalize("Thou art indeed a pious individual.");
@@ -667,7 +664,6 @@ ghod_hitsu(struct monst *priest)
 
     /* bolt of lightning */
     buzz(-10 - (AD_ELEC - 1), 6, x, y, sgn(tbx), sgn(tby));
-    exercise(A_WIS, FALSE);
 }
 
 void

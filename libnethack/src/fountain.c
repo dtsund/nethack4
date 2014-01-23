@@ -145,7 +145,6 @@ dofindgem(void)
               FALSE, FALSE);
     SET_FOUNTAIN_LOOTED(u.ux, u.uy);
     newsym(u.ux, u.uy);
-    exercise(A_WIS, TRUE);      /* a discovery! */
 }
 
 void
@@ -224,7 +223,6 @@ drinkfountain(void)
         }
         win_pause_output(P_MESSAGE);
         pline("A wisp of vapor escapes the fountain...");
-        exercise(A_WIS, TRUE);
         level->locations[u.ux][u.uy].blessedftn = 0;
         return;
     }
@@ -243,7 +241,6 @@ drinkfountain(void)
             pline("You feel self-knowledgeable...");
             win_pause_output(P_MESSAGE);
             enlightenment(0);
-            exercise(A_WIS, TRUE);
             pline("The feeling subsides.");
             break;
 
@@ -304,13 +301,11 @@ drinkfountain(void)
             }
             HSee_invisible |= FROMOUTSIDE;
             newsym(u.ux, u.uy);
-            exercise(A_WIS, TRUE);
             break;
 
         case 26:       /* See Monsters */
 
             monster_detect(NULL, 0);
-            exercise(A_WIS, TRUE);
             break;
 
         case 27:       /* Find a gem in the sparkling waters. */
@@ -372,7 +367,6 @@ dipfountain(struct obj *obj)
             if (obj->spe > -6 && !rn2(3))
                 obj->spe--;
             obj->oerodeproof = FALSE;
-            exercise(A_WIS, FALSE);
         } else {
             /* The lady of the lake acts! - Eric Backus */
             /* Be *REAL* nice */
@@ -384,7 +378,6 @@ dipfountain(struct obj *obj)
             bless(obj);
             obj->oeroded = obj->oeroded2 = 0;
             obj->oerodeproof = TRUE;
-            exercise(A_WIS, TRUE);
         }
         update_inventory();
         level->locations[u.ux][u.uy].typ = ROOM;
@@ -464,7 +457,6 @@ dipfountain(struct obj *obj)
                     }
                 pline("You lost some of your money in the fountain!");
                 CLEAR_FOUNTAIN_LOOTED(u.ux, u.uy);
-                exercise(A_WIS, FALSE);
             }
         }
         break;
@@ -482,7 +474,6 @@ dipfountain(struct obj *obj)
                level, u.ux, u.uy);
         if (!Blind)
             pline("Far below you, you see coins glistening in the water.");
-        exercise(A_WIS, TRUE);
         newsym(u.ux, u.uy);
         break;
     }
@@ -558,7 +549,6 @@ drinksink(void)
             pline("You find a ring in the sink!");
             mkobj_at(RING_CLASS, level, u.ux, u.uy, TRUE);
             level->locations[u.ux][u.uy].looted |= S_LRING;
-            exercise(A_WIS, TRUE);
             newsym(u.ux, u.uy);
         } else
             pline("Some dirty water backs up in the drain.");

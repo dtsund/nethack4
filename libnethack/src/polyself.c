@@ -359,7 +359,6 @@ polymon(int mntmp)
 
     if (mvitals[mntmp].mvflags & G_GENOD) {     /* allow G_EXTINCT */
         pline("You feel rather %s-ish.", mons[mntmp].mname);
-        exercise(A_WIS, TRUE);
         return 0;
     }
 
@@ -592,7 +591,6 @@ polymon(int mntmp)
     turnstate.vision_full_recalc = TRUE;
     see_monsters();
     exercise(A_CON, FALSE);
-    exercise(A_WIS, TRUE);
     encumber_msg();
     return 1;
 }
@@ -948,7 +946,6 @@ dosummon(void)
     u.uen -= 10;
 
     pline("You call upon your brethren for help!");
-    exercise(A_WIS, TRUE);
     if (!were_summon(youmonst.data, TRUE, &placeholder, NULL))
         pline("But none arrive.");
     return 1;

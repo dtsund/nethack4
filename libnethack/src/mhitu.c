@@ -1124,7 +1124,6 @@ hitmu(struct monst *mtmp, const struct attack *mattk)
         /* adjattrib gives dunce cap message when appropriate */
         adjattrib(A_INT, -rnd(2), FALSE);
         forget_objects(50);     /* lose memory of 50% of objects */
-        exercise(A_WIS, FALSE);
         break;
     case AD_PLYS:
         hitmsg(mtmp, mattk);
@@ -2353,7 +2352,6 @@ doseduce(struct monst *mon)
         case 2:
             pline("Your senses are dulled.");
             adjattrib(A_WIS, -1, TRUE);
-            exercise(A_WIS, FALSE);
             break;
         case 3:
             if (!resists_drli(&youmonst)) {
@@ -2378,7 +2376,7 @@ doseduce(struct monst *mon)
     } else {
         mon->mspec_used = rnd(100);     /* monster is worn out */
         pline("You seem to have enjoyed it more than %s...", noit_mon_nam(mon));
-        switch (rn2(5)) {
+        switch (rn2(4)) {
         case 0:
             pline("You feel raised to your full potential.");
             exercise(A_CON, TRUE);
@@ -2390,16 +2388,10 @@ doseduce(struct monst *mon)
             exercise(A_CON, TRUE);
             break;
         case 2:
-            pline("You will always remember %s...", noit_mon_nam(mon));
-            adjattrib(A_WIS, 1, TRUE);
-            exercise(A_WIS, TRUE);
-            break;
-        case 3:
             pline("That was a very educational experience.");
             pluslvl(FALSE);
-            exercise(A_WIS, TRUE);
             break;
-        case 4:
+        case 3:
             pline("You feel restored to health!");
             u.uhp = u.uhpmax;
             if (Upolyd)

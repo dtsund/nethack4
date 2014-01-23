@@ -1055,7 +1055,6 @@ pickup_object(struct obj *obj, long count, boolean telekinesis)
             pline("At your %s, the corpse suddenly moves...",
                   telekinesis ? "attempted acquisition" : "touch");
             revive_corpse(obj);
-            exercise(A_WIS, FALSE);
             return -1;
         }
     } else if (obj->otyp == SCR_SCARE_MONSTER) {

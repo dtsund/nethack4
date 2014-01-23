@@ -97,7 +97,6 @@ dowrite(struct obj *pen, const struct nh_cmd_arg *arg)
     paper->dknown = 1;
     if (paper->otyp != SCR_BLANK_PAPER && paper->otyp != SPE_BLANK_PAPER) {
         pline("That %s is not blank!", typeword);
-        exercise(A_WIS, FALSE);
         return 1;
     }
 
@@ -173,7 +172,6 @@ found:
     /* we're really going to write now, so calculate cost */
     actualcost = rn1(basecost / 2, basecost / 2);
     curseval = bcsign(pen) + bcsign(paper);
-    exercise(A_WIS, TRUE);
     /* dry out marker */
     if (pen->spe < actualcost) {
         pen->spe = 0;

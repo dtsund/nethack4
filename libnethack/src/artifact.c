@@ -504,7 +504,6 @@ touch_artifact(struct obj *obj, struct monst *mon)
         dmg = dice((Antimagic ? 2 : 4), (self_willed ? 10 : 4));
         sprintf(buf, "touching %s", oart->name);
         losehp(dmg, buf, KILLED_BY);
-        exercise(A_WIS, FALSE);
     }
 
     /* can pick it up unless you're totally non-synch'd with the artifact */
@@ -1458,8 +1457,6 @@ arti_speak(struct obj *obj)
         return;
 
     line = getrumor(bcsign(obj), buf, TRUE, &truth);
-    if (truth)
-        exercise(A_WIS, truth == 1);
     if (!*line)
         line = "NetHack rumors file closed for renovation.";
     pline("%s:", Tobjnam(obj, "whisper"));

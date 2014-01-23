@@ -381,9 +381,6 @@ make_engr_at(struct level *lev, int x, int y, const char *s, long e_time,
     ep->engr_txt[engr_len] = '\0';
     while (ep->engr_txt[0] == ' ')
         ep->engr_txt++;
-    /* engraving Elbereth shows wisdom */
-    if (!in_mklev && !strcmp(s, "Elbereth"))
-        exercise(A_WIS, TRUE);
     ep->engr_time = e_time;
     ep->engr_type = e_type > 0 ? e_type : rnd(N_ENGRAVE - 1);
     ep->engr_lth = engr_len + 1;
@@ -561,7 +558,6 @@ doengrave_core(const struct nh_cmd_arg *arg, int auto_elbereth)
             pline("You disturb the undead!");
             level->locations[u.ux][u.uy].disturbed = 1;
             makemon(&mons[PM_GHOUL], level, u.ux, u.uy, NO_MM_FLAGS);
-            exercise(A_WIS, FALSE);
             return 1;
         }
     }

@@ -815,7 +815,6 @@ hmon_hitmon(struct monst *mon, struct obj *obj, int thrown)
                             } else {
                                 pline("Splat!");
                                 useup_eggs(obj);
-                                exercise(A_WIS, FALSE);
                             }
                         }
                         break;
@@ -1217,7 +1216,6 @@ demonpet(void)
     pm = i != NON_PM ? &mons[i] : youmonst.data;
     if ((dtmp = makemon(pm, level, u.ux, u.uy, NO_MM_FLAGS)) != 0)
         tamedog(dtmp, NULL);
-    exercise(A_WIS, TRUE);
 }
 
 /*
@@ -1600,7 +1598,6 @@ damageum(struct monst *mdef, const struct attack *mattk)
             if (ABASE(A_INT) > AMAX(A_INT))
                 ABASE(A_INT) = AMAX(A_INT);
         }
-        exercise(A_WIS, TRUE);
         break;
     case AD_STCK:
         if (!negated && !sticks(mdef->data))

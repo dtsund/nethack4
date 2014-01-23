@@ -774,7 +774,6 @@ dig_up_grave(void)
     struct obj *otmp;
 
     /* Grave-robbing is frowned upon... */
-    exercise(A_WIS, FALSE);
     if (Role_if(PM_ARCHEOLOGIST)) {
         adjalign(-sgn(u.ualign.type) * 3);
         pline("You feel like a despicable grave-robber!");

@@ -286,16 +286,12 @@ exerper(void)
         switch (hs) {
         case SATIATED:
             exercise(A_DEX, FALSE);
-            if (Role_if(PM_MONK))
-                exercise(A_WIS, FALSE);
             break;
         case NOT_HUNGRY:
             exercise(A_CON, TRUE);
             break;
         case WEAK:
             exercise(A_STR, FALSE);
-            if (Role_if(PM_MONK))       /* fasting */
-                exercise(A_WIS, TRUE);
             break;
         case FAINTING:
         case FAINTED:
@@ -322,14 +318,10 @@ exerper(void)
 
     /* status checks */
     if (!(moves % 5)) {
-        if ((HClairvoyant & (INTRINSIC | TIMEOUT)) && !BClairvoyant)
-            exercise(A_WIS, TRUE);
         if (HRegeneration)
             exercise(A_STR, TRUE);
         if (Sick || Vomiting)
             exercise(A_CON, FALSE);
-        if (Confusion || Hallucination)
-            exercise(A_WIS, FALSE);
         if ((Wounded_legs && !u.usteed) || Fumbling || HStun)
             exercise(A_DEX, FALSE);
     }

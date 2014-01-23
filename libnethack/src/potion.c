@@ -485,7 +485,6 @@ peffects(struct obj *otmp)
             if (otmp->blessed) {
                 pline("You feel full of awe.");
                 make_sick(0L, NULL, TRUE, SICK_ALL);
-                exercise(A_WIS, TRUE);
                 exercise(A_CON, TRUE);
                 if (u.ulycn >= LOW_PM)
                     you_unwere(TRUE);   /* "Purified" */
@@ -514,7 +513,6 @@ peffects(struct obj *otmp)
             healup(1, 0, FALSE, FALSE);
         u.uhunger += 10 * (2 + bcsign(otmp));
         newuhs(FALSE);
-        exercise(A_WIS, FALSE);
         if (otmp->cursed) {
             pline("You pass out.");
             helpless(rnd(15), "drunk", "You awake with a headache.");
@@ -527,7 +525,6 @@ peffects(struct obj *otmp)
         if (otmp->cursed) {
             unkn++;
             pline("You have an uneasy feeling...");
-            exercise(A_WIS, FALSE);
         } else {
             if (otmp->blessed) {
                 adjattrib(A_INT, 1, FALSE);
@@ -537,7 +534,6 @@ peffects(struct obj *otmp)
             win_pause_output(P_MESSAGE);
             enlightenment(0);
             pline("The feeling subsides.");
-            exercise(A_WIS, TRUE);
         }
         break;
     case SPE_INVISIBILITY:
@@ -656,13 +652,11 @@ peffects(struct obj *otmp)
         }
         if (monster_detect(otmp, 0))
             return 1;   /* nothing detected */
-        exercise(A_WIS, TRUE);
         break;
     case POT_OBJECT_DETECTION:
     case SPE_DETECT_TREASURE:
         if (object_detect(otmp, 0))
             return 1;   /* nothing detected */
-        exercise(A_WIS, TRUE);
         break;
     case POT_SICKNESS:
         pline("Yecch!  This stuff tastes like poison.");
@@ -865,17 +859,13 @@ peffects(struct obj *otmp)
                 u.uenmax = 0;
             if (u.uen <= 0)
                 u.uen = 0;
-            exercise(A_WIS, TRUE);
         }
         break;
     case POT_OIL:      /* P. Winner */
         {
-            boolean good_for_you = FALSE;
-
             if (otmp->lamplit) {
                 if (likes_fire(youmonst.data)) {
                     pline("Ahh, a refreshing drink.");
-                    good_for_you = TRUE;
                 } else {
                     pline("You burn your %s.", body_part(FACE));
                     losehp(dice(Fire_resistance ? 1 : 3, 4),
@@ -885,7 +875,6 @@ peffects(struct obj *otmp)
                 pline("This tastes like castor oil.");
             else
                 pline("That was smooth!");
-            exercise(A_WIS, good_for_you);
         }
         break;
     case POT_ACID:
@@ -1806,8 +1795,6 @@ dodip(const struct nh_cmd_arg *arg)
     }
 
     if (potion->otyp == POT_OIL) {
-        boolean wisx = FALSE;
-
         if (potion->lamplit) {  /* burning */
             int omat = objects[obj->otyp].oc_material;
 
@@ -1862,9 +1849,7 @@ dodip(const struct nh_cmd_arg *arg)
                 obj->oeroded--;
             if (obj->oeroded2 > 0)
                 obj->oeroded2--;
-            wisx = TRUE;
         }
-        exercise(A_WIS, wisx);
         makeknown(potion->otyp);
         useup(potion);
         return 1;
@@ -1878,7 +1863,6 @@ more_dips:
         if (obj->lamplit || potion->lamplit) {
             useup(potion);
             explode(u.ux, u.uy, 11, dice(6, 6), 0, EXPL_FIERY);
-            exercise(A_WIS, FALSE);
             return 1;
         }
         /* Adding oil to an empty magic lamp renders it into an oil lamp */
@@ -1896,7 +1880,6 @@ more_dips:
             if (obj->age > 1500L)
                 obj->age = 1500L;
             useup(potion);
-            exercise(A_WIS, TRUE);
         }
         makeknown(POT_OIL);
         obj->spe = 1;

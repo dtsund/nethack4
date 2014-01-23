@@ -352,8 +352,6 @@ learn(void)
     if (++u.uoccupation_progress[tos_book] < 0)
         return 1;       /* still busy */
 
-    exercise(A_WIS, TRUE);      /* you're studying. */
-
     sprintf(splname,
             objects[booktype].oc_name_known ? "\"%s\"" : "the \"%s\" spell",
             OBJ_NAME(objects[booktype]));
@@ -366,7 +364,6 @@ learn(void)
                 pline("Your knowledge of %s is keener.", splname);
                 incrnknow(i);
                 u.utracked[tos_book]->spestudied++;
-                exercise(A_WIS, TRUE);  /* extra study */
             } else {    /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
                 pline("You know %s quite well already.", splname);
                 if (yn("Do you want to read the book anyway?") == 'y') {
@@ -774,7 +771,6 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
         return 1;
     }
 
-    exercise(A_WIS, TRUE);
     /* pseudo is a temporary "false" object containing the spell stats */
     pseudo = mksobj(level, spellid(spell), FALSE, FALSE);
     pseudo->blessed = pseudo->cursed = 0;
@@ -970,7 +966,6 @@ throwspell(schar *dx, schar *dy, const struct nh_cmd_arg *arg)
         return 0;
     } else if (Engulfed) {
         pline("The spell is cut short!");
-        exercise(A_WIS, FALSE); /* What were you THINKING! */
         *dx = 0;
         *dy = 0;
         return 1;
@@ -1004,7 +999,6 @@ losespells(void)
         for (i = 0; i < n; i++) {
             if (rnd(n) <= nzap) {
                 spellknow(i) = 0;
-                exercise(A_WIS, FALSE);     /* ouch! */
             }
         }
     }

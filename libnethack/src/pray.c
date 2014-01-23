@@ -1151,7 +1151,6 @@ consume_offering(struct obj *otmp)
         useup(otmp);
     else
         useupf(otmp, 1L);
-    exercise(A_WIS, TRUE);
 }
 
 
@@ -1217,10 +1216,8 @@ dosacrifice(const struct nh_cmd_arg *arg)
         if (your_race(ptr)) {
             if (is_demon(youmonst.data)) {
                 pline("You find the idea very satisfying.");
-                exercise(A_WIS, TRUE);
             } else if (u.ualign.type != A_CHAOTIC) {
                 pline("You'll regret this infamous offense!");
-                exercise(A_WIS, FALSE);
             }
 
             if (altaralign != A_CHAOTIC && altaralign != A_NONE) {
@@ -1454,7 +1451,6 @@ dosacrifice(const struct nh_cmd_arg *arg)
                     struct monst *pri;
 
                     pline("You feel the power of %s increase.", u_gname());
-                    exercise(A_WIS, TRUE);
                     change_luck(1);
                     /* Yes, this is supposed to be &=, not |= */
                     level->locations[u.ux][u.uy].altarmask &=
@@ -1478,7 +1474,6 @@ dosacrifice(const struct nh_cmd_arg *arg)
                     pline("Unluckily, you feel the power of %s decrease.",
                           u_gname());
                     change_luck(-1);
-                    exercise(A_WIS, FALSE);
                     if (rnl(u.ulevel) > 6 && u.ualign.record > 0 &&
                         rnd(u.ualign.record) > (7 * ALIGNLIM) / 8)
                         summon_minion(altaralign, TRUE);
@@ -1567,7 +1562,6 @@ dosacrifice(const struct nh_cmd_arg *arg)
                                    artiname(otmp->oartifact), u_gname());
                     u.ugifts++;
                     u.ublesscnt = rnz(300 + (50 * nartifacts));
-                    exercise(A_WIS, TRUE);
                     /* make sure we can use this weapon */
                     unrestrict_weapon_skill(weapon_type(otmp));
                     discover_artifact(otmp->oartifact);
@@ -1778,7 +1772,6 @@ doturn(const struct nh_cmd_arg *arg)
 
         pline("For some reason, %s seems to ignore you.", u_gname());
         aggravate();
-        exercise(A_WIS, FALSE);
         return 0;
     }
 
@@ -1788,7 +1781,6 @@ doturn(const struct nh_cmd_arg *arg)
         return 0;
     }
     pline("Calling upon %s, you chant an arcane formula.", u_gname());
-    exercise(A_WIS, TRUE);
 
     /* note: does not perform unturn_dead() on victims' inventories */
     range = BOLT_LIM + (u.ulevel / 5);  /* 5 to 11 */

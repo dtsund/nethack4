@@ -86,7 +86,6 @@ use_saddle(struct obj *otmp, const struct nh_cmd_arg *arg)
     }
     if (ptr == &mons[PM_INCUBUS] || ptr == &mons[PM_SUCCUBUS]) {
         pline("Shame on you!");
-        exercise(A_WIS, FALSE);
         return 1;
     }
     if (mtmp->isminion || mtmp->isshk || mtmp->ispriest || mtmp->isgd ||

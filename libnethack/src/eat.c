@@ -1459,7 +1459,6 @@ eatspecial(int nutrition)
     if ((otmp->otyp == TRIDENT) && !otmp->cursed) {
         pline(Hallucination ? "Four out of five dentists agree." :
               "That was pure chewing satisfaction!");
-        exercise(A_WIS, TRUE);
     }
     if ((otmp->otyp == FLINT) && !otmp->cursed) {
         pline("Yabba-dabba delicious!");

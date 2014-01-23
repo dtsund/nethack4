@@ -98,7 +98,6 @@ artitouch(void)
     if (!Qstat(touched_artifact)) {
         Qstat(touched_artifact) = TRUE;
         qt_pager(QT_GOTIT);
-        exercise(A_WIS, TRUE);
     }
 }
 
@@ -292,7 +291,6 @@ chat_with_leader(void)
 
         if (not_capable()) {
             qt_pager(QT_BADLEVEL);
-            exercise(A_WIS, TRUE);
             expulsion(FALSE);
         } else if (is_pure(TRUE) < 0) {
             com_pager(QT_BANISHED);
@@ -304,12 +302,10 @@ chat_with_leader(void)
                 expulsion(TRUE);
             } else {
                 Qstat(not_ready)++;
-                exercise(A_WIS, TRUE);
                 expulsion(FALSE);
             }
         } else {        /* You are worthy! */
             qt_pager(QT_ASSIGNQUEST);
-            exercise(A_WIS, TRUE);
             Qstat(got_quest) = TRUE;
             historic_event(FALSE, "embarked upon an epic quest.");
         }
