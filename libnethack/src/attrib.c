@@ -250,12 +250,11 @@ restore_attrib(void)
 void
 exercise(int i, boolean inc_or_dec)
 {
-    if (i == A_INT || i == A_CHA)
-        return; /* can't exercise these */
-
-    /* no physical exercise while polymorphed; the body's temporary */
-    if (Upolyd && i != A_WIS)
+    if (i == A_INT || i == A_CHA || i == A_WIS) {
+        //These stats shouldn't be exercised.
+        impossible("Bad stat exercise!");
         return;
+    }
 
     if (abs(AEXE(i)) < AVAL) {
         /* 
