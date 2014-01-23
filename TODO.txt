@@ -1,0 +1,51 @@
+Nerf daggerstorms. (DONE)
+
+Overhaul spell schools and levels (DONE), and tweak certain spell mechanics (Magic Missile and Clairvoyance DONE; Detect Unseen NOT DONE).
+
+Remove junk spells (DONE)
+
+Remove Int/Wis split in casting. (DONE)
+
+Adjust spellcasting success algorithm.
+
+Redo Pw regeneration to be based solely on Wis, allow a wider range of regeneration rates. (DONE)
+
+Remove Wis training. (DONE)
+
+Remove special spells. (DONE)
+
+Fix unknown spellbook bug. (DONE)
+
+Make it easier to find more spellbooks.
+
+Smooth randomness in starting inventory.
+
+Ensure no Quest nemesis respects Elbereth. (DONE)
+
+Remove or drastically alter covetous AI. (DONE)
+
+Turn Magicbane into a knife.
+
+Adjust class stats. (FIRST DRAFT DONE)
+
+Adjust class skill caps.
+
+Adjust class intrinsics.
+
+Adjust class god gifts.
+
+Adjust class quests.
+
+Adjust class quest artifacts.
+
+Rogue: Apply backstab to thrown darts, daggers.
+
+Archeologist: Fast digging, grappling hooks, climbing shafts.
+
+Tinker: Add.  Golem-themed Quest.
+
+Caveperson: AC/Damage boosts, inability to communicate.
+
+Healer: Figurine success boost.
+
+Knight: Perhaps make MMoM invocation be Summon Familiar, biased toward warhorse.
