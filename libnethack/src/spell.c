@@ -914,9 +914,18 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
         make_familiar(NULL, u.ux, u.uy, FALSE);
         break;
     case SPE_CLAIRVOYANCE:
-        if (!BClairvoyant)
+        if (!BClairvoyant) {
             do_vicinity_map();
-        /* at present, only one thing blocks clairvoyance */
+            if (Xray_vision) {
+                pline("Your supernatural vision becomes keener.");
+            } else {
+                pline("You begin seeing through solid objects...");
+                //Best do this because we have xray_vision now
+                turnstate.vision_full_recalc = TRUE;
+            }
+            set_itimeout(&HXray_vision, 100);
+        }
+        // at present, only one thing blocks clairvoyance 
         else if (uarmh && uarmh->otyp == CORNUTHAUM)
             pline("You sense a pointy hat on top of your %s.", body_part(HEAD));
         break;

@@ -364,6 +364,13 @@ nh_timeout(void)
             case DETECT_MONSTERS:
                 see_monsters();
                 break;
+            case XRAY_VISION:
+                pline("Your supernatural vision fades.");
+                //Unless we have the Eyes of the Overworld, xray vision just
+                //faded.
+                turnstate.vision_full_recalc = TRUE;
+                see_monsters();
+                break;
             }
         }
 

@@ -340,7 +340,9 @@
 
 # define Lifesaved              worn_extrinsic(LIFESAVED)
 
-# define Xray_vision            worn_extrinsic(XRAY_VISION)
+# define HXray_vision           u.uintrinsic[XRAY_VISION]
+# define EXray_vision           worn_extrinsic(XRAY_VISION)
+# define Xray_vision            (HXray_vision || EXray_vision)
 # define XRAY_RANGE             3
 
 /*** Possessions ***/
