@@ -758,7 +758,7 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
         /* don't put player (quite) into fainting from casting a spell,
            particularly since they might not even be hungry at the
            beginning; however, this is low enough that they must eat before
-           casting anything else except detect food */
+           casting anything else except */
         if (hungr > u.uhunger - 3)
             hungr = u.uhunger - 3;
         //Don't actually deduct the hunger just yet; it's possible that the
