@@ -348,6 +348,13 @@ learn(void)
         u.uoccupation_progress[tos_book] = 0;
         return 0;
     }
+    
+    if (u.utracked[tos_book]->spestudied > MAX_SPELL_STUDY) {
+        pline("This spellbook is too faint to be read any more.");
+        u.utracked[tos_book]->otyp = booktype = SPE_BLANK_PAPER;
+        makeknown((int)booktype);
+        return 0;
+    }
 
     if (++u.uoccupation_progress[tos_book] < 0)
         return 1;       /* still busy */
@@ -357,10 +364,7 @@ learn(void)
             OBJ_NAME(objects[booktype]));
     for (i = 0; i < MAXSPELL; i++) {
         if (spellid(i) == booktype) {
-            if (u.utracked[tos_book]->spestudied > MAX_SPELL_STUDY) {
-                pline("This spellbook is too faint to be read any more.");
-                u.utracked[tos_book]->otyp = booktype = SPE_BLANK_PAPER;
-            } else if (spellknow(i) <= 1000) {
+            if (spellknow(i) <= 1000) {
                 pline("Your knowledge of %s is keener.", splname);
                 incrnknow(i);
                 u.utracked[tos_book]->spestudied++;
@@ -397,7 +401,7 @@ learn(void)
             u.utracked[tos_book] = 0;
             return 0;
         }
-    }
+    }	
     if (costly)
         check_unpaid(u.utracked[tos_book]);
     u.utracked[tos_book] = 0;
