@@ -122,9 +122,9 @@ static const struct artifact const_artilist[] = {
       PHYS(5, 0), NO_DFNS, NO_CARY, 0, A_CHAOTIC, NON_PM, PM_ELF, 800L),
 /*
  *      Magicbane is a bit different!  Its magic fanfare
- *      unbalances victims in addition to doing some damage.
+ *      unbalances victims but does very little damage.
  */
-    A("Magicbane", ATHAME,
+    A("Magicbane", KNIFE,
       (SPFX_RESTR | SPFX_ATTK | SPFX_DEFN), 0, 0,
       STUN(3, 4), DFNS(AD_MAGM), NO_CARY, 0, A_NEUTRAL, PM_WIZARD, NON_PM,
       3500L),

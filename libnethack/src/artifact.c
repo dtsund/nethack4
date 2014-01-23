@@ -709,7 +709,7 @@ static boolean
 magicbane_hit(struct monst *magr,       /* attacker */
               struct monst *mdef,       /* defender */
               struct obj *mb,   /* Magicbane */
-              int *dmgptr,      /* extra damage target will suffer */
+              int *dmgptr,      /* zeroed out at the end, but used internally */
               int dieroll,      /* d20 that has already scored a hit */
               boolean vis,      /* whether the action can be seen */
               char *hittee      /* target's name: "you" or mon_nam(mdef) */
@@ -873,6 +873,7 @@ magicbane_hit(struct monst *magr,       /* attacker */
         }
     }
 
+    *dmgptr = 0; //Magicbane is a weak attack, you use it for the effects
     return result;
 }
 
