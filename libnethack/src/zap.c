@@ -2984,8 +2984,25 @@ zap_hit_mon(struct monst *mon, int type, int nd, struct obj **ootmp)
             break;
         }
         tmp = dice(nd, 6);
-        if (spellcaster)
+        if (spellcaster) {
             tmp += spell_damage_bonus();
+            //Sharply reduce magic missile damage at low skill levels.
+            switch (P_SKILL(P_ATTACK_SPELL)) {
+            case P_ISRESTRICTED:
+            case P_UNSKILLED:
+                tmp /= 4;
+                break;
+            case P_BASIC:
+                tmp /= 2;
+                break;
+            case P_SKILLED:
+                tmp = tmp * 3 / 4;
+                break;
+            default:
+                //Expert gets full damage!
+                break;
+            }
+        }
         break;
     case ZT_FIRE:
         if (resists_fire(mon)) {
