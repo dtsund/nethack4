@@ -20,7 +20,7 @@ Fix unknown spellbook bug. (DONE)
 
 Make it easier to find more spellbooks.
 
-Smooth randomness in starting inventory.
+Smooth randomness in starting inventory. (DONE)
 
 Ensure no Quest nemesis respects Elbereth. (DONE)
 
@@ -30,7 +30,7 @@ Turn Magicbane into a knife. (DONE)
 
 Adjust class stats. (FIRST DRAFT DONE)
 
-Adjust class skill caps.
+Adjust class skill caps. (DONE)
 
 Adjust class intrinsics.
 
