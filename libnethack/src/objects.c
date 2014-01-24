@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-22 */
+/* Last modified by Derrick Sund, 2014-01-23 */
 /* Copyright (c) Mike Threepoint, 1989.                           */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -637,12 +637,11 @@ const struct objclass const_objects[] = {
     TOOL("leather drum", "drum", 0, 0, 0, 0, 4, 25, 25, LEATHER, HI_LEATHER),
     TOOL("drum of earthquake", "drum",
          0, 0, 1, 1, 2, 25, 25, LEATHER, HI_LEATHER),
-/* tools useful as weapons */
+/* useful as a weapon */
     WEPTOOL("pick-axe", NULL,
             1, 0, 0, 20, 100, 50, 6, 3, WHACK, P_PICK_AXE, IRON, HI_METAL),
-    WEPTOOL("grappling hook", "iron hook",
-            0, 0, 0, 5, 30, 50, 2, 6, WHACK, P_FLAIL, IRON, HI_METAL),
-/* 3.4.1: unicorn horn left classified as "magic" */
+    TOOL("grappling hook", "iron hook", 0, 1, 0, 0, 5, 5, 50, IRON, HI_METAL),
+/* 3.4.1: unicorn horn left classified as "magic"; useful as a weapon */
     WEPTOOL("unicorn horn", NULL,
             1, 1, 1, 0, 20, 100, 12, 12, PIERCE, P_UNICORN_HORN, BONE,
             CLR_WHITE),
