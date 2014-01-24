@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-22 */
+/* Last modified by Derrick Sund, 2014-01-23 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -28,24 +28,25 @@ static boolean restricted_spell_discipline(int);
  */
 
 static const struct trobj Archeologist[] = {
+#define A_GRAPPLING_HOOK 7
     /* if adventure has a name...  idea from tan@uvm-gen */
     {BULLWHIP, 2, WEAPON_CLASS, 1, UNDEF_BLESS},
     {LEATHER_JACKET, 0, ARMOR_CLASS, 1, UNDEF_BLESS},
     {FEDORA, 0, ARMOR_CLASS, 1, UNDEF_BLESS},
     {FOOD_RATION, 0, FOOD_CLASS, 3, 0},
     {PICK_AXE, UNDEF_SPE, TOOL_CLASS, 1, UNDEF_BLESS},
-    {TINNING_KIT, UNDEF_SPE, TOOL_CLASS, 1, UNDEF_BLESS},
+    {WAN_DIGGING, UNDEF_SPE, WAND_CLASS, 1, UNDEF_BLESS},
     {TOUCHSTONE, 0, GEM_CLASS, 1, 0},
+    {GRAPPLING_HOOK, 0, TOOL_CLASS, 10, UNDEF_BLESS}, //Quantity variable
     {SACK, 0, TOOL_CLASS, 1, 0},
     {0, 0, 0, 0, 0}
 };
 
 static const struct trobj Barbarian[] = {
-#define B_MAJOR 0       /* two-handed sword or battle-axe */
-#define B_MINOR 1       /* matched with axe or short sword */
     {TWO_HANDED_SWORD, 0, WEAPON_CLASS, 1, UNDEF_BLESS},
     {AXE, 0, WEAPON_CLASS, 1, UNDEF_BLESS},
-    {RING_MAIL, 0, ARMOR_CLASS, 1, UNDEF_BLESS},
+    {STUDDED_LEATHER_ARMOR, 0, ARMOR_CLASS, 1, UNDEF_BLESS},
+    {SPE_FORCE_BOLT, 0, SPBOOK_CLASS, 1, 1},
     {FOOD_RATION, 0, FOOD_CLASS, 1, 0},
     {0, 0, 0, 0, 0}
 };
@@ -89,10 +90,11 @@ static const struct trobj Knight[] = {
 
 static const struct trobj Monk[] = {
 #define M_BOOK          2
+#define M_SHURIKEN      3
     {LEATHER_GLOVES, 2, ARMOR_CLASS, 1, UNDEF_BLESS},
     {ROBE, 1, ARMOR_CLASS, 1, UNDEF_BLESS},
     {UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, 1},
-    {UNDEF_TYP, UNDEF_SPE, SCROLL_CLASS, 1, UNDEF_BLESS},
+    {SHURIKEN, 1, WEAPON_CLASS, 10, 1}, // Variable quantity
     {POT_HEALING, 0, POTION_CLASS, 3, UNDEF_BLESS},
     {FOOD_RATION, 0, FOOD_CLASS, 3, 0},
     {APPLE, 0, FOOD_CLASS, 5, UNDEF_BLESS},
@@ -110,27 +112,30 @@ static const struct trobj Priest[] = {
     {POT_WATER, 0, POTION_CLASS, 4, 1}, /* holy water */
     {CLOVE_OF_GARLIC, 0, FOOD_CLASS, 1, 0},
     {SPRIG_OF_WOLFSBANE, 0, FOOD_CLASS, 1, 0},
-    {UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 2, UNDEF_BLESS},
     {0, 0, 0, 0, 0}
 };
 
 static const struct trobj Ranger[] = {
-#define RAN_BOW         1
-#define RAN_TWO_ARROWS  2
-#define RAN_ZERO_ARROWS 3
+#define RAN_BOW         2
+#define RAN_TWO_ARROWS  3
+#define RAN_ZERO_ARROWS 4
     {DAGGER, 1, WEAPON_CLASS, 1, UNDEF_BLESS},
+    {DAGGER, 0, WEAPON_CLASS, 4, 0},
     {BOW, 1, WEAPON_CLASS, 1, UNDEF_BLESS},
     {ARROW, 2, WEAPON_CLASS, 50, UNDEF_BLESS},
     {ARROW, 0, WEAPON_CLASS, 30, UNDEF_BLESS},
     {CLOAK_OF_DISPLACEMENT, 2, ARMOR_CLASS, 1, UNDEF_BLESS},
+    {SPE_SLOW_MONSTER, 0, SPBOOK_CLASS, 1, 1},
     {CRAM_RATION, 0, FOOD_CLASS, 4, 0},
     {0, 0, 0, 0, 0}
 };
 
 static const struct trobj Rogue[] = {
 #define R_DAGGERS       1
+#define R_DARTS         2
     {SHORT_SWORD, 0, WEAPON_CLASS, 1, UNDEF_BLESS},
     {DAGGER, 0, WEAPON_CLASS, 10, 0},   /* quan is variable */
+    {DART, 0, WEAPON_CLASS, 10, 0},   /* quan is variable */
     {LEATHER_ARMOR, 1, ARMOR_CLASS, 1, UNDEF_BLESS},
     {POT_SICKNESS, 0, POTION_CLASS, 1, 0},
     {LOCK_PICK, 9, TOOL_CLASS, 1, 0},
@@ -143,7 +148,7 @@ static const struct trobj Samurai[] = {
     {KATANA, 0, WEAPON_CLASS, 1, UNDEF_BLESS},
     {SHORT_SWORD, 0, WEAPON_CLASS, 1, UNDEF_BLESS},     /* wakizashi */
     {YUMI, 0, WEAPON_CLASS, 1, UNDEF_BLESS},
-    {YA, 0, WEAPON_CLASS, 25, UNDEF_BLESS},     /* variable quan */
+    {YA, 0, WEAPON_CLASS, 35, UNDEF_BLESS},     /* variable quan */
     {SPLINT_MAIL, 0, ARMOR_CLASS, 1, UNDEF_BLESS},
     {0, 0, 0, 0, 0}
 };
@@ -169,16 +174,11 @@ static const struct trobj Valkyrie[] = {
 };
 
 static const struct trobj Wizard[] = {
-#define W_MULTSTART     2
-#define W_MULTEND       6
-    {QUARTERSTAFF, 1, WEAPON_CLASS, 1, 1},
+    //They get two more spellbooks later.
+    {DAGGER, 0, WEAPON_CLASS, 1, UNDEF_BLESS},
     {CLOAK_OF_MAGIC_RESISTANCE, 0, ARMOR_CLASS, 1, UNDEF_BLESS},
-    {UNDEF_TYP, UNDEF_SPE, WAND_CLASS, 1, UNDEF_BLESS},
-    {UNDEF_TYP, UNDEF_SPE, RING_CLASS, 2, UNDEF_BLESS},
-    {UNDEF_TYP, UNDEF_SPE, POTION_CLASS, 3, UNDEF_BLESS},
-    {UNDEF_TYP, UNDEF_SPE, SCROLL_CLASS, 3, UNDEF_BLESS},
     {SPE_FORCE_BOLT, 0, SPBOOK_CLASS, 1, 1},
-    {UNDEF_TYP, UNDEF_SPE, SPBOOK_CLASS, 1, UNDEF_BLESS},
+    {SPE_MAGIC_MISSILE, 0, SPBOOK_CLASS, 1, 1},
     {0, 0, 0, 0, 0}
 };
 
@@ -236,6 +236,77 @@ static const struct trobj Money[] = {
     {0, 0, 0, 0, 0}
 };
 
+//Random Wizard spellbooks below.  Level 1-3, Enchantment/Escape.
+static const struct trobj Slow_monster[] = {
+    {SPE_SLOW_MONSTER, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+static const struct trobj Confuse_monster[] = {
+    {SPE_CONFUSE_MONSTER, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+static const struct trobj Cause_fear[] = {
+    {SPE_CAUSE_FEAR, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+static const struct trobj Knock[] = {
+    {SPE_KNOCK, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+//Calling this one Jumping causes a name collision.
+static const struct trobj Obj_jumping[] = {
+    {SPE_JUMPING, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+static const struct trobj Wizard_lock[] = {
+    {SPE_WIZARD_LOCK, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+static const struct trobj Haste_self[] = {
+    {SPE_HASTE_SELF, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+//Random Priest spellbooks below.  Level 1-2, Defense/Divination.
+static const struct trobj Healing[] = {
+    {SPE_HEALING, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+//Calling this one Protection causes a name collision.
+static const struct trobj Obj_protection[] = {
+    {SPE_PROTECTION, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+static const struct trobj Cure_sickness[] = {
+    {SPE_CURE_SICKNESS, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+//Calling this one Light causes a name collision.
+static const struct trobj Obj_light[] = {
+    {SPE_LIGHT, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+//Calling this one Detect_monsters causes a name collision.
+static const struct trobj Obj_detect_monsters[] = {
+    {SPE_DETECT_MONSTERS, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
+static const struct trobj Detect_unseen[] = {
+    {SPE_DETECT_UNSEEN, 0, SPBOOK_CLASS, 1, 1},
+    {0, 0, 0, 0, 0}
+};
+
 /* race-based substitutions for initial inventory;
    the weaker cloak for elven rangers is intentional--they shoot better */
 static const struct inv_sub {
@@ -266,9 +337,10 @@ static const struct inv_sub {
     PM_DWARF, HELMET, DWARVISH_IRON_HELM},
         /* { PM_DWARF, SMALL_SHIELD, DWARVISH_ROUNDSHIELD }, */
         /* { PM_DWARF, PICK_AXE, DWARVISH_MATTOCK }, */
-    {
+    /* {
     PM_GNOME, BOW, CROSSBOW}, {
-    PM_GNOME, ARROW, CROSSBOW_BOLT}, {
+    PM_GNOME, ARROW, CROSSBOW_BOLT}, */
+    {
     NON_PM, STRANGE_OBJECT, STRANGE_OBJECT}
 };
 
@@ -591,41 +663,30 @@ u_init_inv_skills(void)
            generators are bad enough to seriously skew the results if we use
            rn2(2)...  --KAA */
     case PM_ARCHEOLOGIST:
-        ini_inv(Archeologist, nclist);
-        if (!rn2(10))
-            ini_inv(Tinopener, nclist);
-        else if (!rn2(4))
-            ini_inv(Lamp, nclist);
-        else if (!rn2(10))
-            ini_inv(Magicmarker, nclist);
+        trobj_list = copy_trobj_list(Archeologist);
+        trobj_list[A_GRAPPLING_HOOK].trquan = rn1(4, 12);
+        ini_inv(trobj_list, nclist);
+        ini_inv(Lamp, nclist);
         knows_object(SACK);
         knows_object(TOUCHSTONE);
         skill_init(Skill_A);
         break;
     case PM_BARBARIAN:
         trobj_list = copy_trobj_list(Barbarian);
-        if (rn2(100) >= 50) {   /* see above comment */
-            trobj_list[B_MAJOR].trotyp = BATTLE_AXE;
-            trobj_list[B_MINOR].trotyp = SHORT_SWORD;
-        }
         ini_inv(trobj_list, nclist);
-        if (!rn2(6))
-            ini_inv(Lamp, nclist);
         knows_class(WEAPON_CLASS);
         knows_class(ARMOR_CLASS);
         skill_init(Skill_B);
         break;
     case PM_CAVEMAN:
         trobj_list = copy_trobj_list(Cave_man);
-        trobj_list[C_AMMO].trquan = rn1(11, 10);        /* 10..20 */
+        trobj_list[C_AMMO].trquan = rn1(6, 15);        /* 10..20 */
         ini_inv(trobj_list, nclist);
         skill_init(Skill_C);
         break;
     case PM_HEALER:
-        u.umoney0 = rn1(1000, 1001);
+        u.umoney0 = rn1(400, 1201);
         ini_inv(Healer, nclist);
-        if (!rn2(25))
-            ini_inv(Lamp, nclist);
         knows_object(POT_FULL_HEALING);
         skill_init(Skill_H);
         break;
@@ -651,20 +712,28 @@ u_init_inv_skills(void)
             trobj_list[M_BOOK].trotyp = SPE_SLEEP;
             break;
         }
+        trobj_list[M_SHURIKEN].trquan = rn1(4, 12);
         ini_inv(trobj_list, nclist);
-        if (!rn2(5))
-            ini_inv(Magicmarker, nclist);
-        else if (!rn2(10))
-            ini_inv(Lamp, nclist);
         knows_class(ARMOR_CLASS);
         skill_init(Skill_Mon);
         break;
     case PM_PRIEST:
         ini_inv(Priest, nclist);
-        if (!rn2(10))
-            ini_inv(Magicmarker, nclist);
-        else if (!rn2(10))
-            ini_inv(Lamp, nclist);
+        //Random spellbooks
+        if(!rn2(3))
+            ini_inv(Healing, nclist);
+        else if(!rn2(2))
+            ini_inv(Obj_protection, nclist);
+        else
+            ini_inv(Cure_sickness, nclist);
+
+        if(!rn2(3))
+            ini_inv(Obj_light, nclist);
+        else if(!rn2(2))
+            ini_inv(Obj_detect_monsters, nclist);
+        else
+            ini_inv(Detect_unseen, nclist);
+        ini_inv(Lamp, nclist);
         knows_object(POT_WATER);
         skill_init(Skill_P);
         /* KMH, conduct -- Some may claim that this isn't agnostic, since they
@@ -681,53 +750,52 @@ u_init_inv_skills(void)
         break;
     case PM_ROGUE:
         trobj_list = copy_trobj_list(Rogue);
-        trobj_list[R_DAGGERS].trquan = rn1(10, 6);
+        trobj_list[R_DAGGERS].trquan = rn1(5, 4);
+        trobj_list[R_DARTS].trquan = rn1(6, 15);
         u.umoney0 = 0;
         ini_inv(trobj_list, nclist);
-        if (!rn2(5))
-            ini_inv(Blindfold, nclist);
         knows_object(SACK);
         skill_init(Skill_R);
         break;
     case PM_SAMURAI:
         trobj_list = copy_trobj_list(Samurai);
-        trobj_list[S_ARROWS].trquan = rn1(20, 26);
+        trobj_list[S_ARROWS].trquan = rn1(11, 35);
         ini_inv(trobj_list, nclist);
-        if (!rn2(5))
-            ini_inv(Blindfold, nclist);
         knows_class(WEAPON_CLASS);
         knows_class(ARMOR_CLASS);
         skill_init(Skill_S);
         break;
     case PM_TOURIST:
         trobj_list = copy_trobj_list(Tourist);
-        trobj_list[T_DARTS].trquan = rn1(20, 21);
-        u.umoney0 = rnd(1000);
+        trobj_list[T_DARTS].trquan = rn1(11, 30);
+        u.umoney0 = rn1(501, 500);
         ini_inv(trobj_list, nclist);
-        if (!rn2(25))
-            ini_inv(Tinopener, nclist);
-        else if (!rn2(25))
-            ini_inv(Leash, nclist);
-        else if (!rn2(25))
-            ini_inv(Towel, nclist);
-        else if (!rn2(25))
-            ini_inv(Magicmarker, nclist);
         skill_init(Skill_T);
         break;
     case PM_VALKYRIE:
         ini_inv(Valkyrie, nclist);
-        if (!rn2(6))
-            ini_inv(Lamp, nclist);
         knows_class(WEAPON_CLASS);
         knows_class(ARMOR_CLASS);
         skill_init(Skill_V);
         break;
     case PM_WIZARD:
         ini_inv(Wizard, nclist);
-        if (!rn2(5))
-            ini_inv(Magicmarker, nclist);
-        if (!rn2(5))
-            ini_inv(Blindfold, nclist);
+        //Random spellbooks
+        if (!rn2(3))
+            ini_inv(Slow_monster, nclist);
+        else if (!rn2(2))
+            ini_inv(Confuse_monster, nclist);
+        else
+            ini_inv(Cause_fear, nclist);
+        
+        if(!rn2(4))
+            ini_inv(Knock, nclist);
+        else if(!rn2(3))
+            ini_inv(Obj_jumping, nclist);
+        else if(!rn2(2))
+            ini_inv(Wizard_lock, nclist);
+        else
+            ini_inv(Haste_self, nclist);
         skill_init(Skill_W);
         break;
 
