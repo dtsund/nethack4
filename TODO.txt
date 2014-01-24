@@ -1,4 +1,4 @@
-/* Last modified by Derrick Sund, 2014-01-23 */
+/* Last modified by Derrick Sund, 2014-01-24 */
 
 Nerf daggerstorms. (DONE)
 
@@ -51,3 +51,76 @@ Caveperson: AC/Damage boosts, inability to communicate.
 Healer: Figurine success boost.
 
 Knight: Perhaps make MMoM invocation be Summon Familiar, biased toward warhorse.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SPELLCASTING SUCCESS ALGORITHM NOTES:
+
+Based on only four factors for a given spell: Int, level, worn armor (penalty for shield, metal; bonus for robe), school skill.  Being restricted should incur a ludicrous penalty.
+
+Following should all hold:
+
+    If restricted, max level + max Int + helm of brilliance + robe should allow casting of level 2 spells either flawlessly or at least with 80%+ success or something.
+
+    Well-enchanted helm of brilliance should provide roughly the same bonus as a robe.  Robe requires giving up potentially valuable (MR, displacement) cloak slot endgame; helm of brilliance not very useful earlygame before enchanting, but has no competition late.  Perhaps implement robe as functionally +4 int.
+    
+    Basic skill + moderate (12+) Int (?) should be enough to cast level 1 spells at xl 1 flawlessly.
+    
+    Skilled + high intelligence should give level 4 easily, even at *relatively* low levels.  
+    
+    Level 7 will usually require Expert.  Semi-doable with Skilled if *everything* else is good.  Level 20-ish Wizard with Expert skill, good stats, and no specially good or bad armor should have it castable.
+    
+    More generally: Basic makes level 1-2 pretty easy, Skilled makes level 3-4 reasonably easy, and Expert makes level 5-6 reasonably easy.  Higher levels possible with serious effort.
+    
+    PERHAPS: Have Intelligence and level alter success in the same way, with one Int point worth some multiple of one level - something like fail = fail - 2*Int - level?  That'd underweight one of those two at some stage of the game, though...
+    
+    PERHAPS: Use the product of level and Int?  Both would matter quite a bit.  fail = fail - modifier * (int - mod1) * (level + mod2) would be nice.  Mod2 would probably be 0.  Banning spellcasting outright below mod1 would be acceptable.
+    
+    ONE IDEA:
+    
+        1: Start with a baseline failure rate based on spell level (which can be over 100% failure; if it's over 100% at the end, automatically fail, and below 0% automatically succeed).
+        
+        2: Add/subtract something based on skill level.  Unskilled = no change, Restricted adds A LOT, everything else subtracts.
+        
+        3: Subtract the following: factor * (int - mod1) * (level + mod2) / metal_armor_penalty.  Metal_armor_penalty is 1 if no metal armor is worn, higher otherwise.  Factor is a magic number constant, possibly just 1.
+        
+        4: Result is percent failure rate.
+        
+        PROBLEM: Toward the endgame, this will mean advances go from 100% failure shooting right past semi-castable right through to 0% failure fairly quickly.
+        
+        NOT SURE THIS IS A PROBLEM.
+        
+        If it is, though, could soft-cap the thing in step 3 based on skill, where anything above a certain cutoff is square rooted or logged or something.  I... kind of don't much like that, though.  Alternatively, make modifier less than 1.
+        
+        PROBLEM 2: Might make level 2 magic stupidly hard to cast for the first few levels, whereas a level 1 wizard can probably sling Magic Missile immediately in vanilla.
+        
+        NOT SURE THIS IS A PROBLEM EITHER.
+        
+        If it is, though, make mod2 negative.
+        
+        
+        
+        Without factor, mod1, and mod2: can get up to 900.
+        
+
+
+
+
+SAMPLE ALGORITHM:
+
+    Baseline percentage fail rate: 200* level - 150.  To this, add 600 if Restricted, 0 if Unskilled, -300 if Basic, -600 if Skilled, and -900 if Expert.
+    Subtract from the result int * xlevel / metal_armor_penalty.  Metal_armor_penalty is 1 if no metal armor or shield is worn, higher otherwise.  Robe functions as +5 int.
+    Clip the result to the range of 0 to 100, and this is percentage failure rate.
