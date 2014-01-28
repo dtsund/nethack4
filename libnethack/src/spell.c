@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-22 */
+/* Last modified by Derrick Sund, 2014-01-28 */
 /* Copyright (c) M. Stephenson 1988                               */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -698,6 +698,66 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     schar dx, dy, dz;
 
     /* 
+     * Find the skill the hero has in a spell type category.
+     * See spell_skilltype for categories.
+     */
+    skill = spell_skilltype(spellid(spell));
+    role_skill = P_SKILL(skill);
+
+    //Get the direction or target, if applicable.
+    //We want to do this *before* determining spell success,
+    //both for interface consistency and to cut down on needless
+    //mksobj calls.
+    switch (spellid(spell)) {
+    
+    //These spells ask the user to target a specific space.
+    case SPE_CONE_OF_COLD:
+    case SPE_FIREBALL:
+        //If Skilled or better, get a specific space.
+        if (role_skill >= P_SKILLED) {
+            if (throwspell(&dx, &dy, arg)) {
+                dz = 0;
+                break;
+            }
+            else {
+                //Decided not to target anything.  Abort the spell.
+                pline("Suit yourself.");
+                return 0;
+            }
+        }
+        //If not Skilled, fall through.
+    case SPE_FORCE_BOLT:
+    case SPE_SLEEP:
+    case SPE_MAGIC_MISSILE:
+    case SPE_KNOCK:
+    case SPE_SLOW_MONSTER:
+    case SPE_WIZARD_LOCK:
+    case SPE_DIG:
+    case SPE_TURN_UNDEAD:
+    case SPE_POLYMORPH:
+    case SPE_TELEPORT_AWAY:
+    case SPE_CANCELLATION:
+    case SPE_FINGER_OF_DEATH:
+    case SPE_HEALING:
+    case SPE_EXTRA_HEALING:
+    case SPE_DRAIN_LIFE:
+    case SPE_STONE_TO_FLESH:
+        if (atme)
+            dx = dy = dz = 0;
+        else if (!getargdir(arg, NULL, &dx, &dy, &dz)) {
+            /* getdir cancelled, abort */
+            pline("Suit yourself.");
+            return 0;
+        }
+        break;
+    //The rest of the spells don't have targeting.
+    //Well... except for Jumping, but that's a difficult fix.
+    default:
+        break;
+    }
+    
+
+    /* 
      * Spell casting no longer affects knowledge of the spell. A
      * decrement of spell knowledge is done every turn.
      */
@@ -779,12 +839,6 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     pseudo = mksobj(level, spellid(spell), FALSE, FALSE);
     pseudo->blessed = pseudo->cursed = 0;
     pseudo->quan = 20L; /* do not let useup get it */
-    /* 
-     * Find the skill the hero has in a spell type category.
-     * See spell_skilltype for categories.
-     */
-    skill = spell_skilltype(pseudo->otyp);
-    role_skill = P_SKILL(skill);
 
     switch (pseudo->otyp) {
         /* 
@@ -796,39 +850,33 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     case SPE_CONE_OF_COLD:
     case SPE_FIREBALL:
         if (role_skill >= P_SKILLED) {
-            if (throwspell(&dx, &dy, arg)) {
-                dz = 0;
-                cc.x = dx;
-                cc.y = dy;
-                n = rnd(8) + 1;
-                while (n--) {
-                    if (!dx && !dy && !dz) {
-                        if ((damage = zapyourself(pseudo, TRUE)) != 0) {
-                            char buf[BUFSZ];
+            cc.x = dx;
+            cc.y = dy;
+            n = rnd(8) + 1;
+            while (n--) {
+                if (!dx && !dy && !dz) {
+                    if ((damage = zapyourself(pseudo, TRUE)) != 0) {
+                        char buf[BUFSZ];
 
-                            sprintf(buf, "zapped %sself with a spell", uhim());
-                            losehp(damage, buf, NO_KILLER_PREFIX);
-                        }
-                    } else {
-                        explode(dx, dy, pseudo->otyp - SPE_MAGIC_MISSILE + 10,
-                                u.ulevel / 2 + 1 + spell_damage_bonus(), 0,
-                                (pseudo->otyp ==
-                                 SPE_CONE_OF_COLD) ? EXPL_FROSTY : EXPL_FIERY);
+                        sprintf(buf, "zapped %sself with a spell", uhim());
+                        losehp(damage, buf, NO_KILLER_PREFIX);
                     }
-                    dx = cc.x + rnd(3) - 2;
-                    dy = cc.y + rnd(3) - 2;
-                    if (!isok(dx, dy) || !cansee(dx, dy) ||
-                        IS_STWALL(level->locations[dx][dy].typ) || Engulfed) {
-                        /* Spell is reflected back to center */
-                        dx = cc.x;
-                        dy = cc.y;
-                    }
+                } else {
+                    explode(dx, dy, pseudo->otyp - SPE_MAGIC_MISSILE + 10,
+                            u.ulevel / 2 + 1 + spell_damage_bonus(), 0,
+                            (pseudo->otyp ==
+                             SPE_CONE_OF_COLD) ? EXPL_FROSTY : EXPL_FIERY);
                 }
-            } else {
-                //No good location; abort.
-                pline("Suit yourself.");
-                return 0;
+                dx = cc.x + rnd(3) - 2;
+                dy = cc.y + rnd(3) - 2;
+                if (!isok(dx, dy) || !cansee(dx, dy) ||
+                    IS_STWALL(level->locations[dx][dy].typ) || Engulfed) {
+                    /* Spell is reflected back to center */
+                    dx = cc.x;
+                    dy = cc.y;
+                }
             }
+
             break;
         }
 
@@ -853,13 +901,6 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     case SPE_DRAIN_LIFE:
     case SPE_STONE_TO_FLESH:
         if (objects[pseudo->otyp].oc_dir != NODIR) {
-            if (atme)
-                dx = dy = dz = 0;
-            else if (!getargdir(arg, NULL, &dx, &dy, &dz)) {
-                /* getdir cancelled, abort */
-                pline("Suit yourself.");
-                return 0;
-            }
             if (!dx && !dy && !dz) {
                 if ((damage = zapyourself(pseudo, TRUE)) != 0) {
                     char buf[BUFSZ];
@@ -935,7 +976,6 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
     case SPE_JUMPING:
         if (!jump(&(struct nh_cmd_arg){.argtype = 0}, max(role_skill, 1))) {
             pline("Nothing happens.");
-            return 0;
         }
         break;
     default:
