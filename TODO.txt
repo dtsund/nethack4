@@ -1,4 +1,4 @@
-/* Last modified by Derrick Sund, 2014-01-24 */
+/* Last modified by Derrick Sund, 2014-01-31 */
 
 Nerf daggerstorms. (DONE)
 
@@ -18,7 +18,7 @@ Remove special spells. (DONE)
 
 Fix unknown spellbook bug. (DONE)
 
-Make it easier to find more spellbooks.
+Make it easier to find more spellbooks. (DONE)
 
 Smooth randomness in starting inventory. (DONE)
 
@@ -40,7 +40,7 @@ Adjust class quests.
 
 Adjust class quest artifacts.
 
-Rogue: Apply backstab to thrown darts, daggers.
+Rogue: Apply backstab to thrown darts, shuriken.
 
 Archeologist: Fast digging, grappling hooks, climbing shafts.
 
@@ -124,3 +124,10 @@ SAMPLE ALGORITHM:
     Baseline percentage fail rate: 200* level - 150.  To this, add 600 if Restricted, 0 if Unskilled, -300 if Basic, -600 if Skilled, and -900 if Expert.
     Subtract from the result int * xlevel / metal_armor_penalty.  Metal_armor_penalty is 1 if no metal armor or shield is worn, higher otherwise.  Robe functions as +5 int.
     Clip the result to the range of 0 to 100, and this is percentage failure rate.
+    
+ANOTHER SAMPLE:
+
+    Failure rate = 200 * spell_level * unskilled_penalty - 150 - (int * (xlvl + skill_bonus)) / (1 + metal_armor_penalty).
+    unskilled_penalty = 2 if Restricted or Unskilled, 1 otherwise.
+    skill_bonus is 15 for each level of skill.
+    
