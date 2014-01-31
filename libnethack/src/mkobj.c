@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2014-01-19 */
+/* Last modified by Derrick Sund, 2014-01-31 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -624,7 +624,7 @@ mksobj(struct level *lev, int otyp, boolean init, boolean artif)
                 /* possibly overridden by mkcorpstat() */
                 otmp->corpsenm = rndmonnum(&lev->z);
                 if (!verysmall(&mons[otmp->corpsenm]) &&
-                    rn2(level_difficulty(&lev->z) / 2 + 10) > 10)
+                    rn2(level_difficulty(&lev->z) / 2 + 10) > 6)
                     add_to_container(otmp, mkobj(lev, SPBOOK_CLASS, FALSE));
             }
             break;
