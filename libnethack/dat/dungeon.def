@@ -1,4 +1,4 @@
-# Last modified by Alex Smith, 2013-09-21
+# Last modified by Derrick Sund, 2014-01-31
 #	Copyright (c) 1990-95 by M. Stephenson
 # NetHack may be freely redistributed.  See license for details.
 #
@@ -24,8 +24,9 @@ CHAINBRANCH:	"Sokoban" "oracle" + (1, 0) up
 RNDLEVEL:	"bigrm" "B" @ (10, 3) 40 5
 CHAINBRANCH:	"The Quest" "oracle" + (6, 2) portal
 BRANCH:		"Fort Ludios" @ (18, 4) portal
-RNDLEVEL:	"medusa" "none" @ (-5, 4) 2
+RNDLEVEL:	"medusa" "none" @ (-5, 3) 2
 LEVALIGN:	chaotic
+CHAINBRANCH:    "The Library" "medusa" + (1, 0) up
 LEVEL:		"castle" "none" @ (-1, 0)
 CHAINBRANCH:	"Gehennom" "castle" + (0, 0) no_down
 BRANCH:		"The Elemental Planes" @ (1, 0) no_down up
@@ -106,6 +107,14 @@ DUNGEON:	"Fort Ludios" "K" (1, 0)
 DESCRIPTION:	mazelike
 ALIGNMENT:	unaligned
 LEVEL:		"knox" "K" @ (-1, 0)
+#
+#   The Library.  Now that polypiling spellbooks doesn't work so well,
+#   give late-game casters a way to amass spells anyway.
+#
+DUNGEON:    "The Library" "L" (1, 0)
+DESCRIPTION:     mazelike
+ALIGNMENT:  lawful
+LEVEL:      "library" "L" @ (-1, 0)
 #
 #	Vlad's Tower
 #

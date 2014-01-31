@@ -1,0 +1,53 @@
+# Last modified by Derrick Sund, 2014-01-31
+#   Copyright (c) 2014 by Derrick Sund
+# NetHack may be freely redistributed.  See license for details.
+#
+MAZE:"library",' '
+FLAGS: noteleport
+GEOMETRY:center,center
+MAP
+----------------------------------------------------------------------------
+|                            |.......|.|.......|                           |
+|                            |.......|.|.......|                           |
+|                            |.......+.+.......|                           |
+|                            |.......|.|.......|                           |
+|                            ---------.---------                           |
+|                            |.......|.|.......|                           |
+|                            |.......+.+.......|                           |
+|                            |.......|.|.......|                           |
+|                            |.......|.|.......|                           |
+|                            ---------.---------                           |
+|                            |.......+.+.......|                           |
+|                            |.......|.|.......|                           |
+|                            |.......|.|.......|                           |
+|                            |.......|.|.......|                           |
+|                            ---------+---------                           |
+|                                   |...|                                  |
+|                                   |...|                                  |
+|                                   |...|                                  |
+----------------------------------------------------------------------------
+ENDMAP
+# Non diggable walls
+NON_DIGGABLE:(00,00,75,19)
+# Everything's lit
+REGION:(00,00,75,19),lit,"ordinary"
+# Entry point
+BRANCH:(38,17,38,17),(0,0,0,0)
+# All loot is spellbooks.
+# Two books in each of the first four rooms, four in each of the last two.
+OBJECT:'+',random,(30,14)
+OBJECT:'+',random,(30,13)
+OBJECT:'+',random,(46,14)
+OBJECT:'+',random,(46,13)
+OBJECT:'+',random,(30,09)
+OBJECT:'+',random,(30,06)
+OBJECT:'+',random,(46,09)
+OBJECT:'+',random,(46,06)
+OBJECT:'+',random,(30,04)
+OBJECT:'+',random,(30,03)
+OBJECT:'+',random,(30,02)
+OBJECT:'+',random,(30,01)
+OBJECT:'+',random,(46,04)
+OBJECT:'+',random,(46,03)
+OBJECT:'+',random,(46,02)
+OBJECT:'+',random,(46,01)
