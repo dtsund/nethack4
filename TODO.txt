@@ -1,4 +1,4 @@
-/* Last modified by Derrick Sund, 2014-01-31 */
+/* Last modified by Derrick Sund, 2014-02-02 */
 
 Nerf daggerstorms. (DONE)
 
@@ -8,7 +8,7 @@ Remove junk spells (DONE)
 
 Remove Int/Wis split in casting. (DONE)
 
-Adjust spellcasting success algorithm.
+Adjust spellcasting success algorithm. (DONE)
 
 Redo Pw regeneration to be based solely on Wis, allow a wider range of regeneration rates. (DONE)
 
