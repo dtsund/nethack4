@@ -1,4 +1,4 @@
-# Last modified by Derrick Sund, 2014-01-31
+# Last modified by Derrick Sund, 2014-02-02
 #   Copyright (c) 2014 by Derrick Sund
 # NetHack may be freely redistributed.  See license for details.
 #
@@ -97,3 +97,8 @@ MONSTER:'h',"mind flayer",(44,04)
 MONSTER:'h',"master mind flayer",(44,03)
 MONSTER:'h',"mind flayer",(44,02)
 MONSTER:'h',"master mind flayer",(44,01)
+# Give a little bit of warning as to challenge level.
+ENGRAVING:(38,16),burn,"Welcome to the Library."
+ENGRAVING:(38,11),burn,"Light reading; suitable for all ages."
+ENGRAVING:(38,07),burn,"Intermediate study."
+ENGRAVING:(38,03),burn,"Advanced students only beyond this point."
