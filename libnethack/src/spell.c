@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-28 */
+/* Last modified by Derrick Sund, 2014-02-02 */
 /* Copyright (c) M. Stephenson 1988                               */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -1143,117 +1143,80 @@ dump_spells(void)
     dospellmenu("Spells known in the end:", SPELLMENU_VIEW, NULL);
 }
 
-
-/* Integer square root function without using floating point. */
-static int
-isqrt(int val)
-{
-    int rt = 0;
-    int odd = 1;
-
-    while (val >= odd) {
-        val = val - odd;
-        odd = odd + 2;
-        rt = rt + 1;
-    }
-    return rt;
-}
-
 static int
 percent_success(int spell)
 {
-    /* Intrinsic and learned ability are combined to calculate the probability
-       of player's success at cast a given spell. */
-    int chance, splcaster, special, statused;
-    int difficulty;
-    int skill;
-
-    /* Calculate intrinsic ability (splcaster) */
-
-    splcaster = urole.spelbase;
-    special = urole.spelheal;
-    statused = ACURR(A_INT);
-
+    //Radically overhauled and much simpler spell success algorithm.
+    //One benefit to a really simple algorithm: gameplay changes resulting from
+    //changes to this are much more obvious, so this thing should be more open
+    //to tweaking than the old formula.
+    int armor_penalty, robe_bonus, skill_bonus, unskilled_penalty;
+    int success_rate;
+    
+    //First, determine how badly our intrinsic spellcasting ability is messed
+    //with by our armor.
+    //Armor penalty is no longer role-specific.
+    //Adding 10 effectively cuts your intrinsic skill by half; I don't trust
+    //floating-point division.
+    //Robe now functions as an intelligence boost.
+    armor_penalty = 0;
     if (uarm && is_metallic(uarm))
-        splcaster += (uarmc &&
-                      uarmc->otyp ==
-                      ROBE) ? urole.spelarmr / 2 : urole.spelarmr;
-    else if (uarmc && uarmc->otyp == ROBE)
-        splcaster -= urole.spelarmr;
-    if (uarms)
-        splcaster += urole.spelshld;
-
-    if (uarmh && is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
-        splcaster += uarmhbon;
-    if (uarmg && is_metallic(uarmg))
-        splcaster += uarmgbon;
-    if (uarmf && is_metallic(uarmf))
-        splcaster += uarmfbon;
-
-    /* `healing spell' bonus */
-    if (spellid(spell) == SPE_HEALING || spellid(spell) == SPE_EXTRA_HEALING ||
-        spellid(spell) == SPE_CURE_SICKNESS ||
-        spellid(spell) == SPE_REMOVE_CURSE)
-        splcaster += special;
-
-    if (splcaster > 20)
-        splcaster = 20;
-
-    /* Calculate learned ability */
-
-    /* Players basic likelihood of being able to cast any spell is based of
-       their `magic' statistic. (Int or Wis) */
-    chance = 11 * statused / 2;
-
-    /* 
-     * High level spells are harder.  Easier for higher level casters.
-     * The difficulty is based on the hero's level and their skill level
-     * in that spell type.
-     */
-    skill = P_SKILL(spell_skilltype(spellid(spell)));
-    skill = max(skill, P_UNSKILLED) - 1;        /* unskilled => 0 */
-    difficulty = (spellev(spell) - 1) * 4 - ((skill * 6) + (u.ulevel / 3) + 1);
-
-    if (difficulty > 0) {
-        /* Player is too low level or unskilled. */
-        chance -= isqrt(900 * difficulty + 2000);
-    } else {
-        /* Player is above level.  Learning continues, but the law of
-           diminishing returns sets in quickly for low-level spells.  That is,
-           a player quickly gains no advantage for raising level. */
-        int learning = 15 * -difficulty / spellev(spell);
-
-        chance += learning > 20 ? 20 : learning;
+        armor_penalty += 10;
+    if (uarms) {
+        if (weight(uarms) > (int)objects[SMALL_SHIELD].oc_weight) {
+            armor_penalty += 4;
+        }
+        else
+            armor_penalty += 2;
     }
+    if (uarmh && is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
+        armor_penalty += uarmhbon;
+    if (uarmg && is_metallic(uarmg))
+        armor_penalty += uarmgbon;
+    if (uarmf && is_metallic(uarmf))
+        armor_penalty += uarmfbon;
 
-    /* Clamp the chance: >18 stat and advanced learning only help to a limit,
-       while chances below "hopeless" only raise the specter of overflowing
-       16-bit ints (and permit wearing a shield to raise the chances :-). */
-    if (chance < 0)
-        chance = 0;
-    if (chance > 120)
-        chance = 120;
+    //Robe functions as +5 int.
+    robe_bonus = 0;
+    if (uarmc && uarmc->otyp == ROBE)
+        robe_bonus += 5;
 
-    /* Wearing anything but a light shield makes it very awkward to cast a
-       spell.  The penalty is not quite so bad for the player's role-specific
-       spell. */
-    if (uarms && weight(uarms) > (int)objects[SMALL_SHIELD].oc_weight)
-        chance /= 4;
+    int skill_level = P_SKILL(spell_skilltype(spellid(spell)));
 
-    /* Finally, chance (based on player intell/wisdom and level) is combined
-       with ability (based on player intrinsics and encumbrances).  No matter
-       how intelligent/wise and advanced a player is, intrinsics and
-       encumbrance can prevent casting; and no matter how able, learning is
-       always required. */
-    chance = chance * (20 - splcaster) / 15 - splcaster;
+    //If Unskilled, double the spell's base failure rate.
+    unskilled_penalty = 1;
+    if (skill_level == P_UNSKILLED || skill_level == P_ISRESTRICTED)
+        unskilled_penalty = 2;
 
-    /* Clamp to percentile */
-    if (chance > 100)
-        chance = 100;
-    if (chance < 0)
-        chance = 0;
+    //Basic/Skilled/Expert function as 15 extra experience levels each.
+    skill_bonus = 0;
+    if (skill_level == P_BASIC)
+        skill_bonus = 15;
+    else if (skill_level == P_SKILLED)
+        skill_bonus = 30;
+    else if (skill_level == P_EXPERT)
+        skill_bonus = 45;
 
-    return chance;
+    //Base failure rate is 50 for level 1 spells, +200 for each level above
+    //that.
+    //If Unskilled, base failure rate is increased to 150 for level 1, +400
+    //per extra level.
+    //Subtract from this the product of experience level and intelligence.  Robe
+    //functions as +5 int, skills function as extra experience levels.  Heavy
+    //armor divides innate ability by some factor.
+    //Done with integers because I don't trust floating-point calculations if
+    //they aren't necessary.
+    success_rate = 150 - 200 * spellev(spell) * unskilled_penalty +
+                   (10 * ((int)ACURR(A_INT) + robe_bonus) *
+                   (u.ulevel + skill_bonus)) / (10 + armor_penalty);
+
+    //Clamp to a sensible percentage rate.
+    if (success_rate > 100)
+        success_rate = 100;
+    if (success_rate < 0)
+        success_rate = 0;
+
+    return success_rate;
 }
 
 
