@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-09-21 */
+/* Last modified by Derrick Sund, 2014-02-04 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -2916,8 +2916,8 @@ const struct permonst mons[] = {
  */
     MON("archeologist", S_HUMAN,
         LVL(10, 12, 10, 1, 3), G_NOGEN,
-        A(ATTK(AT_WEAP, AD_PHYS, 1, 6), ATTK(AT_WEAP, AD_PHYS, 1, 6),
-          NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
+        A(ATTK(AT_WEAP, AD_PHYS, 1, 6),
+          NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
         SIZ(WT_HUMAN, 400, 0, MS_HUMANOID, MZ_HUMAN), 0, 0,
         M1_HUMANOID | M1_TUNNEL | M1_NEEDPICK | M1_OMNIVORE,
         M2_NOPOLY | M2_HUMAN | M2_STRONG | M2_COLLECT, M3_INFRAVISIBLE,
@@ -2932,8 +2932,8 @@ const struct permonst mons[] = {
         HI_DOMESTIC3),
     MON("caveman", S_HUMAN,
         LVL(10, 12, 10, 0, 1), G_NOGEN,
-        A(ATTK(AT_WEAP, AD_PHYS, 2, 4),
-          NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
+        A(ATTK(AT_WEAP, AD_PHYS, 2, 4), ATTK(AT_WEAP, AD_PHYS, 2, 4),
+          NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
         SIZ(WT_HUMAN, 400, 0, MS_HUMANOID, MZ_HUMAN), 0, 0,
         M1_HUMANOID | M1_OMNIVORE,
         M2_NOPOLY | M2_HUMAN | M2_STRONG | M2_MALE | M2_COLLECT,
@@ -2941,8 +2941,8 @@ const struct permonst mons[] = {
         HI_DOMESTIC3),
     MON("cavewoman", S_HUMAN,
         LVL(10, 12, 10, 0, 1), G_NOGEN,
-        A(ATTK(AT_WEAP, AD_PHYS, 2, 4),
-          NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
+        A(ATTK(AT_WEAP, AD_PHYS, 2, 4), ATTK(AT_WEAP, AD_PHYS, 2, 4),
+          NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
         SIZ(WT_HUMAN, 400, 0, MS_HUMANOID, MZ_HUMAN), 0, 0,
         M1_HUMANOID | M1_OMNIVORE,
         M2_NOPOLY | M2_HUMAN | M2_STRONG | M2_FEMALE | M2_COLLECT,
