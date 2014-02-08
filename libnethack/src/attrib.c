@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-21 */
+/* Last modified by Derrick Sund, 2014-02-08 */
 /* Copyright 1988, 1989, 1990, 1992, M. Stephenson                */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -697,6 +697,17 @@ acurrstr(void)
         return (schar) (19 + str / 50); /* map to 19-21 */
     else
         return (schar) (str - 100);
+}
+
+// Return the player's effective AC rating.  DO NOT REFERENCE
+// u.uac DIRECTLY.  USE THIS INSTEAD.
+// TODO: Make protection not directly alter u.uac; add its effect here.
+// It'd probably be best if the armor effects of find_ac in do_wear.c were
+// put here too.
+schar
+get_player_ac(void)
+{
+    return u.uac;
 }
 
 /* avoid possible problems with alignment overflow, and provide a centralized

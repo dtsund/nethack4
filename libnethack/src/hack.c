@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-28 */
+/* Last modified by Derrick Sund, 2014-02-08 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -1882,7 +1882,7 @@ stillinwater:
                 ;
             else if (uarmh && is_metallic(uarmh))
                 pline("Its blow glances off your %s.", helmet_name(uarmh));
-            else if (u.uac + 3 <= rnd(20))
+            else if (get_player_ac() + 3 <= rnd(20))
                 pline("You are almost hit by %s!",
                       x_monnam(mtmp, ARTICLE_A, "falling", 0, TRUE));
             else {

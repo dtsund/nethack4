@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-12-23 */
+/* Last modified by Derrick Sund, 2014-02-08 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -178,7 +178,8 @@ struct you {
 # define LUCKMIN        (-10)
     schar uhitinc;
     schar udaminc;
-    schar uac;
+    schar uac;          // Armor class.
+                        // DO NOT ACCESS THIS DIRECTLY.  USE GET_PLAYER_AC().
     uchar uspellprot;   /* protection by SPE_PROTECTION */
     uchar usptime;      /* #moves until uspellprot-- */
     uchar uspmtime;     /* #moves between uspellprot-- */

@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-02-02 */
+/* Last modified by Derrick Sund, 2014-02-08 */
 /* Copyright (c) M. Stephenson 1988                               */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -610,7 +610,7 @@ cast_protection(void)
 {
     int loglev = 0;
     int l = u.ulevel;
-    int natac = u.uac - u.uspellprot;
+    int natac = get_player_ac() - u.uspellprot;
     int gain;
 
     /* loglev=log2(u.ulevel)+1 (1..5) */
