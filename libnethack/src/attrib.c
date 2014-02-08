@@ -752,7 +752,7 @@ get_player_ac(void)
 {
     // FIXME: Crude but it'll work for now.
     if(Role_switch == PM_CAVEMAN)
-        return u.uac + u.ulevel;
+        return u.uac - u.ulevel;
     return u.uac;
 }
 
