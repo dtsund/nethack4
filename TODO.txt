@@ -1,4 +1,4 @@
-/* Last modified by Derrick Sund, 2014-02-02 */
+/* Last modified by Derrick Sund, 2014-02-08 */
 
 Nerf daggerstorms. (DONE)
 
@@ -32,7 +32,7 @@ Adjust class stats. (FIRST DRAFT DONE)
 
 Adjust class skill caps. (DONE)
 
-Adjust class intrinsics.
+Adjust class intrinsics. (DONE)
 
 Adjust class god gifts.
 
