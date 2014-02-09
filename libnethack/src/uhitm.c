@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2014-01-03 */
+/* Last modified by Derrick Sund, 2014-02-08 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -922,6 +922,11 @@ hmon_hitmon(struct monst *mon, struct obj *obj, int thrown)
         if (!thrown || !obj || !uwep || !ammo_and_launcher(obj, uwep))
             tmp += dbon();
     }
+
+    // TODO: Abstract away udaminc and dbon, incorporate them all together
+    // with this.
+    if (Role_switch == PM_CAVEMAN)
+        tmp += u.ulevel / 3;
 
     if (valid_weapon_attack) {
         struct obj *wep;
