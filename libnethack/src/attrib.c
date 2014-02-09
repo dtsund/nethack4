@@ -30,24 +30,25 @@ static
 struct innate arc_abil[] = { 
     {1, &(HStealth), "", ""},
     {1, &(HFast), "", ""},
-    {10, &(HSearching), "perceptive", ""},
+    {5, &(HSearching), "perceptive", ""},
     {0, 0, 0, 0}
 };
 
 struct innate bar_abil[] = {
-    {1, &(HPoison_resistance), "", ""},
     {7, &(HFast), "quick", "slow"},
     {15, &(HStealth), "stealthy", ""},
     {0, 0, 0, 0}
 };
 
 struct innate cav_abil[] = {
+    {1, &(HSick_resistance), "", ""},
     {7, &(HFast), "quick", "slow"},
     {15, &(HWarning), "sensitive", ""},
     {0, 0, 0, 0}
 };
 
 struct innate hea_abil[] = {
+    {1, &(HSick_resistance), "", ""},
     {1, &(HPoison_resistance), "", ""},
     {15, &(HWarning), "sensitive", ""},
     {0, 0, 0, 0}
@@ -88,6 +89,7 @@ struct innate ran_abil[] = {
 
 struct innate rog_abil[] = {
     {1, &(HStealth), "", ""},
+    {5, &(HPoison_resistance), "healthy", ""},
     {10, &(HSearching), "perceptive", ""},
     {0, 0, 0, 0}
 };
@@ -106,7 +108,6 @@ struct innate tou_abil[] = {
 
 struct innate val_abil[] = {
     {1, &(HCold_resistance), "", ""},
-    {1, &(HStealth), "", ""},
     {7, &(HFast), "quick", "slow"},
     {0, 0, 0, 0}
 };
