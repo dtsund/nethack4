@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-02-08 */
+/* Last modified by Derrick Sund, 2014-02-10 */
 /* Copyright (c) Steve Creps, 1988.                               */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -378,6 +378,8 @@ extern void adj_abon(struct obj *, schar);
 
 extern void initedog(struct monst *);
 extern struct monst *make_familiar(struct obj *, xchar, xchar, boolean);
+extern struct monst *make_familiar_general(struct obj *, xchar, xchar, boolean,
+                                           int);
 extern struct monst *makedog(void);
 extern void update_mlstmv(void);
 extern void losedogs(void);

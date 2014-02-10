@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-10 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -46,12 +46,19 @@ pet_type(void)
 struct monst *
 make_familiar(struct obj *otmp, xchar x, xchar y, boolean quietly)
 {
+    return make_familiar_general(otmp, x, y, quietly, 0);
+}
+
+struct monst *
+make_familiar_general(struct obj *otmp, xchar x, xchar y, boolean quietly,
+                      int index)
+{
     const struct permonst *pm;
     struct monst *mtmp = 0;
     int chance, trycnt = 100;
 
     do {
-        if (otmp) {     /* figurine; otherwise spell */
+        if (otmp) {     /* figurine; otherwise spell or god gift */
             int mndx = otmp->corpsenm;
 
             pm = &mons[mndx];
@@ -66,6 +73,9 @@ make_familiar(struct obj *otmp, xchar x, xchar y, boolean quietly)
                     pline("... into a pile of dust.");
                 break;  /* mtmp is null */
             }
+        } else if (index) { //figurine
+            //God gifts circumvent normal limits
+            pm = &mons[index];
         } else if (!rn2(3)) {
             pm = &mons[pet_type()];
         } else {

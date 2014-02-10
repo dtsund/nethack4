@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-22 */
+/* Last modified by Derrick Sund, 2014-02-10 */
 /* Copyright (c) Benson I. Margulies, Mike Stephenson, Steve Linhart, 1989. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -699,6 +699,7 @@ gcrownu(void)
         // monks rarely wield a weapon, but have use for spells
         class_gift = HELM_OF_BRILLIANCE;
         obj = mksobj(level, class_gift, TRUE, FALSE);
+        obj->oerodeproof = TRUE;
         bless(obj);
         obj->bknown = TRUE;
         at_your_feet("A helmet");
@@ -1546,7 +1547,49 @@ dosacrifice(const struct nh_cmd_arg *arg)
             /* you were already in pretty good standing */
             /* The player can gain an artifact */
             /* The chance goes down as the number of artifacts goes up */
-            if (u.ulevel > 2 && u.uluck >= 0 &&
+
+            //First, Healers.  They don't get artifacts at all; they get pets.
+            if (Role_if(PM_HEALER)) {
+                if (u.ulevel > 2 && u.uluck > 0 && !rn2(10 + (2 * u.ugifts))) {
+                    godvoice (u.ualign.type, "Aid the devout, my servant!");
+                    //First gift is always an aleax; afterward, 1/4 chance of
+                    //an angel.
+                    //TODO: Make this more elegant.
+                    if(u.ugifts == 0 || !rn2(4)) {
+                        make_familiar_general(NULL, u.ux, u.uy, TRUE,
+                                              PM_ALEAX);
+                        historic_event(FALSE, "received pet aleax from %s.",
+                                       u_gname());
+                    } else {
+                        make_familiar_general(NULL, u.ux, u.uy, TRUE,
+                                              PM_ANGEL);
+                        historic_event(FALSE, "received pet angel from %s.",
+                                       u_gname());
+                    }
+                    u.ugifts++;
+                    u.ublesscnt = rnz(300 + (50 * u.ugifts));
+                }
+            }
+            //Second, Monks.  Their first gift isn't an artifact, though they
+            //get them later.
+            else if (Role_if(PM_MONK) && u.ugifts == 0) {
+                if (u.ulevel > 2 && u.uluck > 0 && !rn2(10)) {
+                    otmp = mksobj(level, GAUNTLETS_OF_POWER, TRUE, FALSE);
+                    otmp->oerodeproof = TRUE;
+                    bless(otmp);
+                    otmp->bknown = TRUE;
+                    at_your_feet("A pair of gloves");
+                    godvoice(u.ualign.type, "Use my gift wisely!");
+                    historic_event(FALSE, "received gauntlets of power from %s",
+                                   u_gname());
+                    dropy(otmp);
+                    u.ugifts++;
+                    u.ublesscnt = rnz(300 + (50 * u.ugifts));
+                }
+            }
+            //All other cases (Monk with first gift already given falls through
+            //to this case).                    
+            else if (u.ulevel > 2 && u.uluck >= 0 &&
                 !rn2(10 + (2 * u.ugifts * nartifacts))) {
                 otmp = mk_artifact(level, NULL, a_align(u.ux, u.uy));
                 if (otmp) {
