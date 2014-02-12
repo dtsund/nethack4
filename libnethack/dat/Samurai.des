@@ -1,4 +1,4 @@
-# Last modified by Alex Smith, 2013-09-21
+# Last modified by Derrick Sund, 2014-02-11
 #	Copyright (c) 1989 by Jean-Christophe Collet
 #	Copyright (c) 1991-92 by M. Stephenson, P. Winner
 # NetHack may be freely redistributed.  See license for details.
@@ -277,7 +277,7 @@ STAIR:place[0],up
 # Non diggable walls
 NON_DIGGABLE:(00,00,44,19)
 # Objects
-OBJECT:')',"tsurugi",(22,10),blessed,0,"The Tsurugi of Muramasa"
+OBJECT:')',"yumi",(22,10),blessed,0,"The Yumi of Yoichi"
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random

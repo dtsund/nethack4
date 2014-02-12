@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-21 */
+/* Last modified by Derrick Sund, 2014-02-11 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985-1999. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -271,7 +271,7 @@ const struct Role roles[] = {
      PM_SAMURAI, NON_PM, PM_LITTLE_DOG,
      PM_LORD_SATO, PM_ROSHI, PM_ASHIKAGA_TAKAUJI,
      PM_WOLF, PM_STALKER, S_DOG, S_ELEMENTAL,
-     ART_TSURUGI_OF_MURAMASA,
+     ART_YUMI_OF_YOICHI,
      MH_HUMAN | ROLE_MALE | ROLE_FEMALE | ROLE_LAWFUL,
      /* Str Int Wis Dex Con Cha */
      {10, 8, 7, 10, 17, 6},

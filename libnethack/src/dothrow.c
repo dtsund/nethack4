@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-01-21 */
+/* Last modified by Derrick Sund, 2014-02-11 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -970,6 +970,7 @@ throwit(struct obj *obj, long wep_mask, /* used to re-equip returning boomerang
             range = 1;
 
         obj_destroyed = FALSE;
+        short missile_type = obj->otyp;
         mon =
             beam_hit(dx, dy, range, THROWN_WEAPON, NULL, NULL, obj,
                      &obj_destroyed);
@@ -977,6 +978,46 @@ throwit(struct obj *obj, long wep_mask, /* used to re-equip returning boomerang
         /* have to do this after bhit() so u.ux & u.uy are correct */
         if (Is_airlevel(&u.uz) || Levitation)
             hurtle(-dx, -dy, urange, TRUE);
+
+        // Shooting a ya at something with the Yumi of Yoichi lets you
+        // approach it instantly.
+        if (mon && missile_type == YA && uwep && uwep->otyp == YUMI &&
+            uwep->oartifact == ART_YUMI_OF_YOICHI) {
+            //Alright, let's figure out where we need to move.
+            //Arrows stop at the first enemy they encounter, even if
+            //they don't hit.
+            //If this ceases to be the case, the following will BREAK HORRIBLY.
+            xchar destination_x, destination_y;
+            if (bhitpos.x == u.ux)
+                destination_x = u.ux;
+            else if (bhitpos.x < u.ux)
+                destination_x = bhitpos.x + 1;
+            else
+                destination_x = bhitpos.x - 1;
+
+            if (bhitpos.y == u.uy)
+                destination_y = u.uy;
+            else if (bhitpos.y < u.uy)
+                destination_y = bhitpos.y + 1;
+            else
+                destination_y = bhitpos.y - 1;
+
+            // It's possible we were already adjacent.
+            if (destination_x != u.ux || destination_y != u.uy) {
+                xchar old_x = u.ux;
+                xchar old_y = u.uy;
+                u.ux = destination_x;
+                u.uy = destination_y;
+                //This updating code really should be in its own function.
+                newsym(old_x, old_y);
+                see_monsters();
+                turnstate.vision_full_recalc = TRUE;
+                vision_recalc(0);   /* vision before effects */
+                spoteffects(TRUE);
+                pline("You rush at %s as your ya hits!", mon_nam(mon));
+                invocation_message();
+            }
+        }
 
         if (obj_destroyed)
             return;

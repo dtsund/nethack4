@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-11-12 */
+/* Last modified by Derrick Sund, 2014-02-11 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -240,10 +240,10 @@ static const struct artifact const_artilist[] = {
       NO_ATTK, NO_DFNS, NO_CARY,
       UNTRAP, A_CHAOTIC, PM_ROGUE, NON_PM, 3500L),
 
-    A("The Tsurugi of Muramasa", TSURUGI,
-      (SPFX_NOGEN | SPFX_RESTR | SPFX_INTEL | SPFX_BEHEAD | SPFX_LUCK), 0, 0,
-      PHYS(0, 8), NO_DFNS, NO_CARY,
-      0, A_LAWFUL, PM_SAMURAI, NON_PM, 4500L),
+    A("The Yumi of Yoichi", YUMI,
+      (SPFX_NOGEN | SPFX_RESTR | SPFX_INTEL | SPFX_LUCK), 0, 0,
+      PHYS(5, 0), NO_DFNS, NO_CARY,
+      ARTI_TELEPORT, A_LAWFUL, PM_SAMURAI, NON_PM, 4500L),
 
     A("The Platinum Yendorian Express Card", CREDIT_CARD,
       (SPFX_NOGEN | SPFX_RESTR | SPFX_INTEL | SPFX_DEFN),

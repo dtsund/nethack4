@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-11 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -878,7 +878,7 @@ magicbane_hit(struct monst *magr,       /* attacker */
 }
 
 
-/* the tsurugi of muramasa or vorpal blade hit someone */
+/* the vorpal blade hit someone */
 static boolean
 artifact_hit_behead(struct monst *magr, struct monst *mdef, struct obj *otmp,
                     int *dmgptr, int dieroll)
@@ -895,49 +895,7 @@ artifact_hit_behead(struct monst *magr, struct monst *mdef, struct obj *otmp,
 
     /* We really want "on a natural 20" but Nethack does it in reverse from
        AD&D. */
-    if (otmp->oartifact == ART_TSURUGI_OF_MURAMASA && dieroll == 1) {
-        wepdesc = "The razor-sharp blade";
-        /* not really beheading, but so close, why add another SPFX */
-        if (youattack && Engulfed && mdef == u.ustuck) {
-            pline("You slice %s wide open!", mon_nam(mdef));
-            *dmgptr = 2 * mdef->mhp + FATAL_DAMAGE_MODIFIER;
-            return TRUE;
-        }
-        if (!youdefend) {
-            /* allow normal cutworm() call to add extra damage */
-            if (notonhead)
-                return FALSE;
-
-            if (bigmonst(mdef->data)) {
-                if (youattack)
-                    pline("You slice deeply into %s!", mon_nam(mdef));
-                else if (vis)
-                    pline("%s cuts deeply into %s!", Monnam(magr), hittee);
-                *dmgptr *= 2;
-                return TRUE;
-            }
-            *dmgptr = 2 * mdef->mhp + FATAL_DAMAGE_MODIFIER;
-            pline("%s cuts %s in half!", wepdesc, mon_nam(mdef));
-            otmp->dknown = TRUE;
-            return TRUE;
-        } else {
-            if (bigmonst(youmonst.data)) {
-                pline("%s cuts deeply into you!",
-                      magr ? Monnam(magr) : wepdesc);
-                *dmgptr *= 2;
-                return TRUE;
-            }
-
-            /* Players with negative AC's take less damage instead * of just
-               not getting hit.  We must add a large enough * value to the
-               damage so that this reduction in * damage does not prevent
-               death. */
-            *dmgptr = 2 * (Upolyd ? u.mh : u.uhp) + FATAL_DAMAGE_MODIFIER;
-            pline("%s cuts you in half!", wepdesc);
-            otmp->dknown = TRUE;
-            return TRUE;
-        }
-    } else if (otmp->oartifact == ART_VORPAL_BLADE &&
+    if (otmp->oartifact == ART_VORPAL_BLADE &&
                (dieroll == 1 || mdef->data == &mons[PM_JABBERWOCK])) {
         static const char *const behead_msg[2] = {
             "%s beheads %s!",
@@ -1138,7 +1096,7 @@ artifact_hit(struct monst * magr, struct monst * mdef, struct obj * otmp,
         return FALSE;
     }
 
-    /* Tsurugi of Muramasa, Vorpal Blade */
+    /* Vorpal Blade */
     if (spec_ability(otmp, SPFX_BEHEAD))
         return artifact_hit_behead(magr, mdef, otmp, dmgptr, dieroll);
 
@@ -1376,6 +1334,9 @@ arti_invoke(struct obj *obj)
                                     aobjnam(otmp, "fall"), NULL);
                 break;
             }
+        case ARTI_TELEPORT:
+            tele();
+            break;
         }
     } else {
         /* on is true if invoked prop is about to be set */
