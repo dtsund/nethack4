@@ -1,4 +1,4 @@
-/* Last modified by Derrick Sund, 2014-02-08 */
+/* Last modified by Derrick Sund, 2014-02-13 */
 
 Nerf daggerstorms. (DONE)
 
@@ -34,7 +34,7 @@ Adjust class skill caps. (DONE)
 
 Adjust class intrinsics. (DONE)
 
-Adjust class god gifts.
+Adjust class god gifts. (DONE; Knight NOT DONE, but guaranteed lance in Quest might be good enough)
 
 Adjust class quests.
 
@@ -46,9 +46,9 @@ Archeologist: Fast digging, grappling hooks, climbing shafts.
 
 Tinker: Add.  Golem-themed Quest.
 
-Caveperson: AC/Damage boosts, inability to communicate.
+Caveperson: AC/Damage boosts (DONE), inability to communicate (NOT DONE).
 
-Healer: Figurine success boost.
+Healer: Figurine success boost.  Start with blessed eucalyptus leaves.
 
 Knight: Perhaps make MMoM invocation be Summon Familiar, biased toward warhorse.
 
