@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-13 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -789,6 +789,45 @@ not_special:
         /* guards shouldn't get too distracted */
         if (!mtmp->mpeaceful && is_mercenary(ptr))
             minr = 1;
+
+        //Covetous monsters want something specific.
+        //We can't just let tactics() handle this, or else their movement
+        //wouldn't take any time.
+        //This should only overwrite gx and gy above if they don't already have
+        //what they want.
+        //The Wizard of Yendor's case is handled elsewhere, in tactics().
+        if (is_covetous(ptr) && ptr != &mons[PM_WIZARD_OF_YENDOR]) {
+            long strat = strategy(mtmp);
+            long where = (strat & STRAT_STRATMASK);
+            xchar tx = STRAT_GOALX(strat), ty = STRAT_GOALY(strat);
+            int targ = strat & STRAT_GOAL;
+            struct obj *otmp;
+
+            //Might be standing on it already.
+            if(tx == omx && ty == omy && where == STRAT_GROUND) {
+                if ((otmp = on_ground(which_arti(targ))) != 0) {
+                    if (cansee(mtmp->mx, mtmp->my))
+                        pline("%s picks up %s.", Monnam(mtmp),
+                              (distu(mtmp->mx, mtmp->my) <= 5) ?
+                              doname(otmp) : distant_name(otmp, doname));
+                    obj_extract_self(otmp);
+                    mpickobj(mtmp, otmp);
+                    mmoved = 3;
+                    goto postmov;
+                }
+            } else if (where == STRAT_GROUND) {
+                //If it's otherwise on the ground, go to it and pick it up.
+                //We don't need to special-case it being in the player's
+                //inventory, because covetous enemies are already murderously
+                //intent on hitting the player.
+                //XXX: This might open the door to "abusive" play where the
+                //player drops a quest artifact and pelts the nemesis with
+                //ranged attacks while it retrieves the thing.  I'm not sure
+                //this is actually a problem, though.
+                gx = tx;
+                gy = ty;
+            }
+        }
 
         if ((likegold || likegems || likeobjs || likemagic || likerock ||
              conceals)

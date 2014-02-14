@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-11-16 */
+/* Last modified by Derrick Sund, 2014-02-13 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -20,7 +20,6 @@ static struct monst *other_mon_has_arti(struct monst *, short);
 static struct obj *on_ground(short);
 static boolean you_have(int);
 static long target_on(int, struct monst *);
-static long strategy(struct monst *);
 
 static const int nasties[] = {
     PM_COCKATRICE, PM_ETTIN, PM_STALKER, PM_MINOTAUR, PM_RED_DRAGON,
@@ -232,7 +231,7 @@ target_on(int mask, struct monst *mtmp)
     return STRAT_NONE;
 }
 
-static long
+long
 strategy(struct monst *mtmp)
 {
     long strat, dstrat;
@@ -244,24 +243,27 @@ strategy(struct monst *mtmp)
         (mtmp->isshk && inhishop(mtmp)))
         return STRAT_NONE;
 
-    switch ((mtmp->mhp * 3) / mtmp->mhpmax) {   /* 0-3 */
+    //Only the Wizard has hit and run tactics
+    if(mtmp->data == &mons[PM_WIZARD_OF_YENDOR]) {
+        switch ((mtmp->mhp * 3) / mtmp->mhpmax) {   /* 0-3 */
 
-    default:
-    case 0:    /* panic time - mtmp is almost snuffed */
-        return STRAT_HEAL;
-
-    case 1:    /* the wiz is less cautious */
-        if (mtmp->data != &mons[PM_WIZARD_OF_YENDOR])
+        default:
+        case 0:    /* panic time - mtmp is almost snuffed */
             return STRAT_HEAL;
-        /* else fall through */
 
-    case 2:
-        dstrat = STRAT_HEAL;
-        break;
+        case 1:    /* the wiz is less cautious */
+            if (mtmp->data != &mons[PM_WIZARD_OF_YENDOR])
+                return STRAT_HEAL;
+            /* else fall through */
 
-    case 3:
-        dstrat = STRAT_NONE;
-        break;
+        case 2:
+            dstrat = STRAT_HEAL;
+            break;
+
+        case 3:
+            dstrat = STRAT_NONE;
+            break;
+        }
     }
 
     if (flags.made_amulet)

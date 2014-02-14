@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-02-10 */
+/* Last modified by Derrick Sund, 2014-02-13 */
 /* Copyright (c) Steve Creps, 1988.                               */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -1821,6 +1821,7 @@ extern boolean win_list_items(struct nh_objlist *, boolean invent);
 extern void amulet(void);
 extern int mon_has_amulet(struct monst *);
 extern int mon_has_special(struct monst *);
+extern long strategy(struct monst *mtmp);
 extern int tactics(struct monst *);
 extern void aggravate(void);
 extern void clonewiz(void);
