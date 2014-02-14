@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-02-11 */
+/* Last modified by Derrick Sund, 2014-02-13 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -1320,15 +1320,12 @@ arti_invoke(struct obj *obj)
                 otmp->blessed = obj->blessed;
                 otmp->cursed = obj->cursed;
                 otmp->bknown = obj->bknown;
-                if (obj->blessed) {
-                    if (otmp->spe < 0)
-                        otmp->spe = 0;
+                if (obj->blessed)
                     otmp->quan += rnd(10);
-                } else if (obj->cursed) {
-                    if (otmp->spe > 0)
-                        otmp->spe = 0;
-                } else
+                else if (!obj->cursed)
                     otmp->quan += rnd(5);
+                //Make the arrows have the same enchantment as the source.
+                otmp->spe = obj->spe;
                 otmp->owt = weight(otmp);
                 hold_another_object(otmp, "Suddenly %s out.",
                                     aobjnam(otmp, "fall"), NULL);
