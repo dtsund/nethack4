@@ -14,10 +14,9 @@
 
 extern const int monstr[];
 
-static short which_arti(int);
 static boolean mon_has_arti(struct monst *, short);
 static struct monst *other_mon_has_arti(struct monst *, short);
-static struct obj *on_ground(short);
+struct obj *on_ground(short);
 static boolean you_have(int);
 static long target_on(int, struct monst *);
 
@@ -122,7 +121,7 @@ mon_has_special(struct monst *mtmp)
 
 #define M_Wants(mask)   (mtmp->data->mflags3 & (mask))
 
-static short
+short
 which_arti(int mask)
 {
     switch (mask) {
@@ -175,7 +174,7 @@ other_mon_has_arti(struct monst *mtmp, short otyp)
     return NULL;
 }
 
-static struct obj *
+struct obj *
 on_ground(short otyp)
 {
     struct obj *otmp;

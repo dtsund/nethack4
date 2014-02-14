@@ -1821,6 +1821,8 @@ extern boolean win_list_items(struct nh_objlist *, boolean invent);
 extern void amulet(void);
 extern int mon_has_amulet(struct monst *);
 extern int mon_has_special(struct monst *);
+extern short which_arti(int mask);
+extern struct obj *on_ground(short);
 extern long strategy(struct monst *mtmp);
 extern int tactics(struct monst *);
 extern void aggravate(void);
