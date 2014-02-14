@@ -776,7 +776,6 @@ spelleffects(int spell, boolean atme, const struct nh_cmd_arg *arg)
         }
         break;
     //The rest of the spells don't have targeting.
-    //Well... except for Jumping, but that's a difficult fix.
     default:
         break;
     }
