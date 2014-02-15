@@ -2300,8 +2300,10 @@ lookaround(enum u_interaction_mode uim)
                 && mtmp->m_ap_type != M_AP_OBJECT &&
                 (!mtmp->minvis || See_invisible) && !mtmp->mundetected) {
                 if ((!aggressive_farmoving && check_interrupt(mtmp)) ||
-                    (x == u.ux + u.dx && y == u.uy + u.dy && !travelling()))
-                    goto stop;
+                    (x == u.ux + u.dx && y == u.uy + u.dy && !travelling())) {
+                    action_completed();
+                    return;
+                }
             }
 
             if (level->locations[x][y].typ == STONE)
@@ -2319,8 +2321,10 @@ lookaround(enum u_interaction_mode uim)
                        mtmp->mappearance == S_vcdoor))) {
                 if (travelling() || (x != u.ux && y != u.uy))
                     continue;
-                if (!aggressive_farmoving)
-                    goto stop;
+                if (!aggressive_farmoving) {
+                    action_completed();
+                    return;
+                }
                 goto bcorr;
             } else if (level->locations[x][y].typ == CORR) {
             bcorr:
@@ -2344,18 +2348,22 @@ lookaround(enum u_interaction_mode uim)
             } else if ((trap = t_at(level, x, y)) && trap->tseen) {
                 if (aggressive_farmoving)
                     goto bcorr; /* if you must */
-                if (x == u.ux + u.dx && y == u.uy + u.dy)
-                    goto stop;
+                if (x == u.ux + u.dx && y == u.uy + u.dy) {
+                    action_completed();
+                    return;
+                }
                 continue;
             } else if (is_pool(level, x, y) || is_lava(level, x, y)) {
                 /* water and lava only stop you if directly in front, and stop
                    you even if you are running */
                 if (!Levitation && !Flying && !is_clinger(youmonst.data) &&
-                    x == u.ux + u.dx && y == u.uy + u.dy)
+                    x == u.ux + u.dx && y == u.uy + u.dy) {
                     /* No Wwalking check; otherwise they'd be able to test
                        boots by trying to SHIFT-direction into a pool and
                        seeing if the game allowed it */
-                    goto stop;
+                    action_completed();
+                    return;
+                }
                 continue;
             } else {    /* e.g. objects or trap or stairs */
                 if (aggressive_farmoving)
@@ -2368,13 +2376,14 @@ lookaround(enum u_interaction_mode uim)
                     ((y == u.uy - u.dy) && (x != u.ux + u.dx)))
                     continue;
             }
-        stop:
             action_completed();
             return;
         }       /* end for loops */
 
-    if (corrct > 1 && go2)
-        goto stop;
+    if (corrct > 1 && go2) {
+        action_completed();
+        return;
+    }
     if (!go2 && !noturn && !m0 && i0 &&
         (corrct == 1 || (corrct == 2 && i0 == 1))) {
         /* make sure that we do not turn too far */
