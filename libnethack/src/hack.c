@@ -2380,7 +2380,7 @@ lookaround(enum u_interaction_mode uim)
             return;
         }       /* end for loops */
 
-    if (corrct > 1 && go2) {
+    if (corrct > 2 && go2) {
         action_completed();
         return;
     }
