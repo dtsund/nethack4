@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2014-01-12 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Kevin Hugo, 1998-1999. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -62,7 +62,7 @@ use_saddle(struct obj *otmp, const struct nh_cmd_arg *arg)
         pline("Saddle yourself?  Very funny...");
         return 0;
     }
-    if (!isok(u.ux + dx, u.uy + dy) ||
+    if (!Within_map_boundary(u.ux + dx, u.uy + dy) ||
         !(mtmp = m_at(level, u.ux + dx, u.uy + dy)) || !canspotmon(mtmp)) {
         pline("I see nobody there.");
         return 0;
@@ -174,7 +174,7 @@ doride(const struct nh_cmd_arg *arg)
     if (u.usteed)
         dismount_steed(DISMOUNT_BYCHOICE);
     else if (getargdir(arg, NULL, &dx, &dy, &dz) &&
-             isok(u.ux + dx, u.uy + dy)) {
+             Within_map_boundary(u.ux + dx, u.uy + dy)) {
         if (wizard && yn("Force the mount to succeed?") == 'y')
             forcemount = TRUE;
         return mount_steed(m_at(level, u.ux + dx, u.uy + dy), forcemount);
@@ -426,7 +426,7 @@ landing_spot(coord * spot,      /* landing position (we fill it in) */
     for (; !found && i < 2; ++i) {
         for (x = u.ux - 1; x <= u.ux + 1; x++)
             for (y = u.uy - 1; y <= u.uy + 1; y++) {
-                if (!isok(x, y) || (x == u.ux && y == u.uy))
+                if (!Within_map_boundary(x, y) || (x == u.ux && y == u.uy))
                     continue;
 
                 if (ACCESSIBLE(level->locations[x][y].typ) &&

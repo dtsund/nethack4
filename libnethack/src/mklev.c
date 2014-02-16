@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -411,9 +411,9 @@ place_niche(struct level *lev, struct mkroom *aroom, int *dy, int *xx, int *yy)
     *xx = dd.x;
     *yy = dd.y;
     return ((boolean)
-            ((isok(*xx, *yy + *dy) &&
+            ((Within_map_boundary(*xx, *yy + *dy) &&
               lev->locations[*xx][*yy + *dy].typ == STONE)
-             && (isok(*xx, *yy - *dy) &&
+             && (Within_map_boundary(*xx, *yy - *dy) &&
                  !IS_POOL(lev->locations[*xx][*yy - *dy].typ)
                  && !IS_FURNITURE(lev->locations[*xx][*yy - *dy].typ))));
 }
@@ -1063,22 +1063,22 @@ bydoor(struct level *lev, xchar x, xchar y)
 {
     int typ;
 
-    if (isok(x + 1, y)) {
+    if (Within_map_boundary(x + 1, y)) {
         typ = lev->locations[x + 1][y].typ;
         if (IS_DOOR(typ) || typ == SDOOR)
             return TRUE;
     }
-    if (isok(x - 1, y)) {
+    if (Within_map_boundary(x - 1, y)) {
         typ = lev->locations[x - 1][y].typ;
         if (IS_DOOR(typ) || typ == SDOOR)
             return TRUE;
     }
-    if (isok(x, y + 1)) {
+    if (Within_map_boundary(x, y + 1)) {
         typ = lev->locations[x][y + 1].typ;
         if (IS_DOOR(typ) || typ == SDOOR)
             return TRUE;
     }
-    if (isok(x, y - 1)) {
+    if (Within_map_boundary(x, y - 1)) {
         typ = lev->locations[x][y - 1].typ;
         if (IS_DOOR(typ) || typ == SDOOR)
             return TRUE;

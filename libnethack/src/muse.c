@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-02-14 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (C) 1990 by Ken Arromdee                              */
 /* NetHack may be freely redistributed.  See license for details.  */
 
@@ -339,7 +339,7 @@ find_defensive(struct monst *mtmp, struct musable *m)
 
         for (xx = x - 1; xx <= x + 1; xx++)
             for (yy = y - 1; yy <= y + 1; yy++)
-                if (isok(xx, yy))
+                if (Within_map_boundary(xx, yy))
                     if (xx != u.ux && yy != u.uy)
                         if (mtmp->data != &mons[PM_GRID_BUG] || xx == x ||
                             yy == y)
@@ -381,7 +381,7 @@ find_defensive(struct monst *mtmp, struct musable *m)
            soldier play the bugle when it sees or remembers soldiers nearby... */
         for (xx = x - 3; xx <= x + 3; xx++)
             for (yy = y - 3; yy <= y + 3; yy++)
-                if (isok(xx, yy))
+                if (Within_map_boundary(xx, yy))
                     if ((mon = m_at(lev, xx, yy)) && is_mercenary(mon->data) &&
                         mon->data != &mons[PM_GUARD] && (mon->msleeping ||
                                                          (!mon->mcanmove))) {
@@ -1184,7 +1184,7 @@ mbhit(struct monst *mon,        /* monster shooting the wand */
         x = bhitpos.x;
         y = bhitpos.y;
 
-        if (!isok(x, y)) {
+        if (!Within_map_boundary(x, y)) {
             bhitpos.x -= ddx;
             bhitpos.y -= ddy;
             break;
@@ -1335,7 +1335,8 @@ use_offensive(struct monst *mtmp, struct musable *m)
             for (x = mmx - 1; x <= mmx + 1; x++) {
                 for (y = mmy - 1; y <= mmy + 1; y++) {
                     /* Is this a suitable spot? */
-                    if (isok(x, y) && !closed_door(level, x, y) &&
+                    if (Within_map_boundary(x, y) &&
+                        !closed_door(level, x, y) &&
                         !IS_ROCK(level->locations[x][y].typ) &&
                         !IS_AIR(level->locations[x][y].typ) &&
                         (((x == mmx) &&
@@ -1543,7 +1544,7 @@ find_misc(struct monst * mtmp, struct musable * m)
                                    passes_walls(mdat));
         for (xx = x - 1; xx <= x + 1; xx++)
             for (yy = y - 1; yy <= y + 1; yy++)
-                if (isok(xx, yy) && (xx != u.ux || yy != u.uy))
+                if (Within_map_boundary(xx, yy) && (xx != u.ux || yy != u.uy))
                     if (mdat != &mons[PM_GRID_BUG] || xx == x || yy == y)
                         if ( /* (xx==x && yy==y) || */ !level->monsters[xx][yy])
                             if ((t = t_at(level, xx, yy)) != 0 &&

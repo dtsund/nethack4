@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-10-05 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) J. C. Collet, M. Stephenson and D. Cohrs, 1992   */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -185,7 +185,7 @@ flood_fill_rm(struct level *lev, int sx, int sy, int rmno, boolean lit,
 
             for (ii = (i == sx ? i - 1 : i); ii <= i + 1; ii++)
                 for (jj = sy - 1; jj <= sy + 1; jj++)
-                    if (isok(ii, jj) &&
+                    if (Within_map_boundary(ii, jj) &&
                         (IS_WALL(lev->locations[ii][jj].typ) ||
                          IS_DOOR(lev->locations[ii][jj].typ))) {
                         lev->locations[ii][jj].edge = 1;
@@ -199,36 +199,36 @@ flood_fill_rm(struct level *lev, int sx, int sy, int rmno, boolean lit,
     }
     nx = i;
 
-    if (isok(sx, sy - 1)) {
+    if (Within_map_boundary(sx, sy - 1)) {
         for (i = sx; i < nx; i++)
             if (lev->locations[i][sy - 1].typ == fg_typ) {
                 if ((int)lev->locations[i][sy - 1].roomno != rmno)
                     flood_fill_rm(lev, i, sy - 1, rmno, lit, anyroom);
             } else {
-                if ((i > sx || isok(i - 1, sy - 1)) &&
+                if ((i > sx || Within_map_boundary(i - 1, sy - 1)) &&
                     lev->locations[i - 1][sy - 1].typ == fg_typ) {
                     if ((int)lev->locations[i - 1][sy - 1].roomno != rmno)
                         flood_fill_rm(lev, i - 1, sy - 1, rmno, lit, anyroom);
                 }
-                if ((i < nx - 1 || isok(i + 1, sy - 1)) &&
+                if ((i < nx - 1 || Within_map_boundary(i + 1, sy - 1)) &&
                     lev->locations[i + 1][sy - 1].typ == fg_typ) {
                     if ((int)lev->locations[i + 1][sy - 1].roomno != rmno)
                         flood_fill_rm(lev, i + 1, sy - 1, rmno, lit, anyroom);
                 }
             }
     }
-    if (isok(sx, sy + 1)) {
+    if (Within_map_boundary(sx, sy + 1)) {
         for (i = sx; i < nx; i++)
             if (lev->locations[i][sy + 1].typ == fg_typ) {
                 if ((int)lev->locations[i][sy + 1].roomno != rmno)
                     flood_fill_rm(lev, i, sy + 1, rmno, lit, anyroom);
             } else {
-                if ((i > sx || isok(i - 1, sy + 1)) &&
+                if ((i > sx || Within_map_boundary(i - 1, sy + 1)) &&
                     lev->locations[i - 1][sy + 1].typ == fg_typ) {
                     if ((int)lev->locations[i - 1][sy + 1].roomno != rmno)
                         flood_fill_rm(lev, i - 1, sy + 1, rmno, lit, anyroom);
                 }
-                if ((i < nx - 1 || isok(i + 1, sy + 1)) &&
+                if ((i < nx - 1 || Within_map_boundary(i + 1, sy + 1)) &&
                     lev->locations[i + 1][sy + 1].typ == fg_typ) {
                     if ((int)lev->locations[i + 1][sy + 1].roomno != rmno)
                         flood_fill_rm(lev, i + 1, sy + 1, rmno, lit, anyroom);
@@ -257,7 +257,8 @@ wallify_map(struct level *lev)
             if (lev->locations[x][y].typ == STONE) {
                 for (yy = y - 1; yy <= y + 1; yy++)
                     for (xx = x - 1; xx <= x + 1; xx++)
-                        if (isok(xx, yy) && lev->locations[xx][yy].typ == ROOM) {
+                        if (Within_map_boundary(xx, yy) && 
+                            lev->locations[xx][yy].typ == ROOM) {
                             if (yy != y)
                                 lev->locations[x][y].typ = HWALL;
                             else

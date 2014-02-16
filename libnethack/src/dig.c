@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -36,7 +36,7 @@ rm_waslit(void)
         return TRUE;
     for (x = u.ux - 2; x < u.ux + 3; x++)
         for (y = u.uy - 1; y < u.uy + 2; y++)
-            if (isok(x, y) && level->locations[x][y].waslit)
+            if (Within_map_boundary(x, y) && level->locations[x][y].waslit)
                 return TRUE;
     return FALSE;
 }
@@ -50,7 +50,7 @@ mkcavepos(xchar x, xchar y, int dist, boolean waslit, boolean rockit)
 {
     struct rm *loc;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return;
     loc = &level->locations[x][y];
 
@@ -882,7 +882,7 @@ use_pick_axe(struct obj *obj, const struct nh_cmd_arg *arg)
             confdir(&dx, &dy);
         rx = u.ux + dx;
         ry = u.uy + dy;
-        if (!isok(rx, ry)) {
+        if (!Within_map_boundary(rx, ry)) {
             pline("Clash!");
             return 1;
         }
@@ -1188,7 +1188,7 @@ zap_dig(schar dx, schar dy, schar dz)
     digdepth = rn1(18, 8);
     tsym = tmpsym_init(DISP_BEAM, dbuf_effect(E_MISC, E_digbeam));
     while (--digdepth >= 0) {
-        if (!isok(zx, zy))
+        if (!Within_map_boundary(zx, zy))
             break;
         room = &level->locations[zx][zy];
         tmpsym_at(tsym, zx, zy);

@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-02-14 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -328,7 +328,7 @@ m_throw(struct monst *mon, int x, int y, int dx, int dy, int range,
     /* pre-check for doors, walls and boundaries. Also need to pre-check for
        bars regardless of direction; the random chance for small objects
        hitting bars is skipped when reaching them at point blank range */
-    if (!isok(bhitpos.x + dx, bhitpos.y + dy)
+    if (!Within_map_boundary(bhitpos.x + dx, bhitpos.y + dy)
         || IS_ROCK(level->locations[bhitpos.x + dx][bhitpos.y + dy].typ)
         || closed_door(level, bhitpos.x + dx, bhitpos.y + dy)
         || (level->locations[bhitpos.x + dx][bhitpos.y + dy].typ == IRONBARS &&
@@ -458,7 +458,7 @@ m_throw(struct monst *mon, int x, int y, int dx, int dy, int range,
             }
         } else if (!range       /* reached end of path */
                    /* missile hits edge of screen */
-                   || !isok(bhitpos.x + dx, bhitpos.y + dy)
+                   || !Within_map_boundary(bhitpos.x + dx, bhitpos.y + dy)
                    /* missile hits the wall */
                    || IS_ROCK(level->
                               locations[bhitpos.x + dx][bhitpos.y + dy].typ)
@@ -682,7 +682,8 @@ mfind_target(struct monst *mtmp)
             tbx = (x - mtmp->mx);
             tby = (y - mtmp->my);
 
-            if (!isok(x, y) || !ZAP_POS(level->locations[x][y].typ) ||
+            if (!Within_map_boundary(x, y) ||
+                !ZAP_POS(level->locations[x][y].typ) ||
                 closed_door(level, x, y))
                 break;  /* off the map or otherwise bad */
 
@@ -1055,7 +1056,7 @@ mlined_up(struct monst * mtmp, struct monst * mdef, boolean breath)
     for (; i > 0; --i) {
         x += dx;
         y += dy;
-        if (!isok(x, y))
+        if (!Within_map_boundary(x, y))
             break;
 
         if (x == u.ux && y == u.uy)
@@ -1078,7 +1079,7 @@ mlined_up(struct monst * mtmp, struct monst * mdef, boolean breath)
     for (; i > 0; --i) {
         x -= dx;
         y -= dy;
-        if (!isok(x, y))
+        if (!Within_map_boundary(x, y))
             break;
 
         if (x == u.ux && y == u.uy)

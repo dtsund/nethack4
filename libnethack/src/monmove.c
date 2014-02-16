@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -67,7 +67,7 @@ watch_on_duty(struct monst *mtmp)
             x = u.ux + dx;
             y = u.uy + dy;
 
-            if (isok(x, y))
+            if (Within_map_boundary(x, y))
                 watch_warn(mtmp, x, y, FALSE);
         }
     }
@@ -1294,7 +1294,7 @@ set_apparxy(struct monst *mtmp)
                 goto found_you; /* punt */
             mx = u.ux - disp + rn2(2 * disp + 1);
             my = u.uy - disp + rn2(2 * disp + 1);
-        } while (!isok(mx, my)
+        } while (!Within_map_boundary(mx, my)
                  || (disp != 2 && mx == mtmp->mx && my == mtmp->my)
                  || ((mx != u.ux || my != u.uy) && !passes_walls(mtmp->data) &&
                      (!ACCESSIBLE(level->locations[mx][my].typ) ||

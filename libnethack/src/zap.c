@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-02-14 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -2715,7 +2715,7 @@ beam_hit(int ddx, int ddy, int range,   /* direction and range */
         x = bhitpos.x;
         y = bhitpos.y;
 
-        if (!isok(x, y)) {
+        if (!Within_map_boundary(x, y)) {
             bhitpos.x -= ddx;
             bhitpos.y -= ddy;
             break;
@@ -3387,7 +3387,8 @@ buzz(int type, int nd, xchar sx, xchar sy, int dx, int dy)
         sx += dx;
         lsy = sy;
         sy += dy;
-        if (isok(sx, sy) && (loc = &level->locations[sx][sy])->typ) {
+        if (Within_map_boundary(sx, sy) &&
+            (loc = &level->locations[sx][sy])->typ) {
             mon = m_at(level, sx, sy);
             if (cansee(sx, sy)) {
                 /* reveal/unreveal invisible monsters before tmpsym_at() */
@@ -3555,24 +3556,24 @@ buzz(int type, int nd, xchar sx, xchar sy, int dx, int dy)
             }
             bounce = 0;
             range--;
-            if (range && isok(lsx, lsy) && cansee(lsx, lsy))
+            if (range && Within_map_boundary(lsx, lsy) && cansee(lsx, lsy))
                 pline("%s bounces!", The(fltxt));
             if (!dx || !dy || !rn2(20)) {
                 dx = -dx;
                 dy = -dy;
             } else {
-                if (isok(sx, lsy) &&
+                if (Within_map_boundary(sx, lsy) &&
                     ZAP_POS(rmn = level->locations[sx][lsy].typ) &&
                     !closed_door(level, sx, lsy) &&
                     (IS_ROOM(rmn) ||
-                     (isok(sx + dx, lsy) &&
+                     (Within_map_boundary(sx + dx, lsy) &&
                       ZAP_POS(level->locations[sx + dx][lsy].typ))))
                     bounce = 1;
-                if (isok(lsx, sy) &&
+                if (Within_map_boundary(lsx, sy) &&
                     ZAP_POS(rmn = level->locations[lsx][sy].typ) &&
                     !closed_door(level, lsx, sy) &&
                     (IS_ROOM(rmn) ||
-                     (isok(lsx, sy + dy) &&
+                     (Within_map_boundary(lsx, sy + dy) &&
                       ZAP_POS(level->locations[lsx][sy + dy].typ))))
                     if (!bounce || rn2(2))
                         bounce = 2;

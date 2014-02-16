@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -929,7 +929,7 @@ seffects(struct obj *sobj, boolean * known)
 
             for (i = -bd; i <= bd; i++)
                 for (j = -bd; j <= bd; j++) {
-                    if (!isok(u.ux + i, u.uy + j))
+                    if (!Within_map_boundary(u.ux + i, u.uy + j))
                         continue;
                     if ((mtmp = m_at(level, u.ux + i, u.uy + j)) != 0)
                         maybe_tame(mtmp, sobj);
@@ -1129,7 +1129,8 @@ seffects(struct obj *sobj, boolean * known)
                     for (y = u.uy - 1; y <= u.uy + 1; y++) {
 
                         /* Is this a suitable spot? */
-                        if (isok(x, y) && !closed_door(level, x, y) &&
+                        if (Within_map_boundary(x, y) && 
+                            !closed_door(level, x, y) &&
                             !IS_ROCK(level->locations[x][y].typ) &&
                             !IS_AIR(level->locations[x][y].typ) &&
                             (x != u.ux || y != u.uy)) {

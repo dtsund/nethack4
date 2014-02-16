@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -1493,9 +1493,9 @@ launch_obj(short otyp, int x1, int y1, int x2, int y2, int style)
                 (otmp2 = sobj_at(BOULDER, level, bhitpos.x, bhitpos.y)) != 0) {
                 const char *bmsg = " as one boulder sets another in motion";
 
-                if (!isok(bhitpos.x + dx, bhitpos.y + dy) || !dist ||
-                    IS_ROCK(level->
-                            locations[bhitpos.x + dx][bhitpos.y + dy].typ))
+                if (!Within_map_boundary(bhitpos.x + dx, bhitpos.y + dy) ||
+                    !dist || IS_ROCK(level->
+                                locations[bhitpos.x + dx][bhitpos.y + dy].typ))
                     bmsg = " as one boulder hits another";
 
                 You_hear("a loud crash%s!",
@@ -1519,7 +1519,7 @@ launch_obj(short otyp, int x1, int y1, int x2, int y2, int style)
         }
 
         /* if about to hit iron bars, do so now */
-        if (dist > 0 && isok(bhitpos.x + dx, bhitpos.y + dy) &&
+        if (dist > 0 && Within_map_boundary(bhitpos.x + dx, bhitpos.y + dy) &&
             level->locations[bhitpos.x + dx][bhitpos.y + dy].typ == IRONBARS) {
             x2 = bhitpos.x, y2 = bhitpos.y;     /* object stops here */
             if (hits_bars(&singleobj, x2, y2, !rn2(20), 0)) {
@@ -1640,7 +1640,8 @@ isclearpath(struct level *lev, coord * cc, int distance, schar dx, schar dy)
         x += dx;
         y += dy;
         typ = lev->locations[x][y].typ;
-        if (!isok(x, y) || !ZAP_POS(typ) || closed_door(lev, x, y))
+        if (!Within_map_boundary(x, y) || !ZAP_POS(typ) ||
+            closed_door(lev, x, y))
             return FALSE;
     }
     cc->x = x;
@@ -2616,7 +2617,7 @@ domagictrap(void)
                 adjattrib(A_CHA, 1, FALSE);
                 for (i = -1; i <= 1; i++)
                     for (j = -1; j <= 1; j++) {
-                        if (!isok(u.ux + i, u.uy + j))
+                        if (!Within_map_boundary(u.ux + i, u.uy + j))
                             continue;
                         mtmp = m_at(level, u.ux + i, u.uy + j);
                         if (mtmp)

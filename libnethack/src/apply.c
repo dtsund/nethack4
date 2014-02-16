@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-02-14 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -282,7 +282,7 @@ use_stethoscope(struct obj *obj, const struct nh_cmd_arg *arg)
 
     rx = u.ux + dx;
     ry = u.uy + dy;
-    if (!isok(rx, ry)) {
+    if (!Within_map_boundary(rx, ry)) {
         You_hear("a faint typing noise.");
         return 0;
     }
@@ -462,7 +462,7 @@ use_leash(struct obj *obj, const struct nh_cmd_arg *arg)
 
     cc.x = u.ux + dx;
     cc.y = u.uy + dy;
-    if (!isok(cc.x, cc.y))
+    if (!Within_map_boundary(cc.x, cc.y))
         return 0;
 
     if (!dx && !dy) {
@@ -1355,7 +1355,7 @@ get_jump_coords(const struct nh_cmd_arg *arg, coord *cc, int magic)
     } else if (!cansee(cc->x, cc->y)) {
         pline("You cannot see where to land!");
         return 0;
-    } else if (!isok(cc->x, cc->y)) {
+    } else if (!Within_map_boundary(cc->x, cc->y)) {
         pline("You cannot jump there!");
         return 0;
     } else {
@@ -1782,7 +1782,7 @@ figurine_location_checks(struct obj *obj, coord * cc, boolean quietly)
     }
     x = cc->x;
     y = cc->y;
-    if (!isok(x, y)) {
+    if (!Within_map_boundary(x, y)) {
         if (!quietly)
             pline("You cannot put the figurine there.");
         return FALSE;
@@ -2202,7 +2202,7 @@ use_whip(struct obj *obj, const struct nh_cmd_arg *arg)
         confdir(&dx, &dy);
     rx = u.ux + dx;
     ry = u.uy + dy;
-    mtmp = (isok(rx, ry)) ? m_at(level, rx, ry) : NULL;
+    mtmp = (Within_map_boundary(rx, ry)) ? m_at(level, rx, ry) : NULL;
 
     /* fake some proficiency checks */
     proficient = 0;
@@ -2287,7 +2287,7 @@ use_whip(struct obj *obj, const struct nh_cmd_arg *arg)
          */
         const char *wrapped_what = NULL;
 
-        if (!isok(rx, ry)) {
+        if (!Within_map_boundary(rx, ry)) {
             pline("%s",
                   Is_airlevel(&u.uz) ? "You snap your whip through thin air." :
                   msg_snap);
@@ -2782,7 +2782,7 @@ do_break_wand(struct obj *obj)
     for (i = 0; i <= 8; i++) {
         bhitpos.x = x = obj->ox + xdir[i];
         bhitpos.y = y = obj->oy + ydir[i];
-        if (!isok(x, y))
+        if (!Within_map_boundary(x, y))
             continue;
 
         if (obj->otyp == WAN_DIGGING) {

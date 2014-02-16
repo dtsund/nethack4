@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -309,7 +309,7 @@ pick_lock(struct obj *pick, const struct nh_cmd_arg *arg)
         return 0;
     cc.x = u.ux + dx;
     cc.y = u.uy + dy;
-    if (!isok(cc.x, cc.y))
+    if (!Within_map_boundary(cc.x, cc.y))
         return 0;
 
     picktyp = pick->otyp;
@@ -573,7 +573,7 @@ doopen(const struct nh_cmd_arg *arg)
 
     cc.x = u.ux + dx;
     cc.y = u.uy + dy;
-    if (!isok(cc.x, cc.y))
+    if (!Within_map_boundary(cc.x, cc.y))
         return 0;
 
     if ((cc.x == u.ux) && (cc.y == u.uy))
@@ -721,7 +721,7 @@ doclose(const struct nh_cmd_arg *arg)
 
     cc.x = u.ux + dx;
     cc.y = u.uy + dy;
-    if (!isok(cc.x, cc.y))
+    if (!(cc.x, cc.y))
         return 0;
 
     if ((cc.x == u.ux) && (cc.y == u.uy)) {

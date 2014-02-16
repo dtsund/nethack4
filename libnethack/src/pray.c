@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Benson I. Margulies, Mike Stephenson, Steve Linhart, 1989. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -149,7 +149,7 @@ in_trouble(void)
         for (j = -1; j <= 1; j++) {
             if (!i && !j)
                 continue;
-            if (!isok(u.ux + i, u.uy + j) ||
+            if (!Within_map_boundary(u.ux + i, u.uy + j) ||
                 IS_ROCK(level->locations[u.ux + i][u.uy + j].typ)
                 || (blocked_boulder(i, j) && !throws_rocks(youmonst.data)))
                 count++;
@@ -1998,7 +1998,8 @@ altar_wrath(int x, int y)
     }
 }
 
-/* assumes isok() at one space away, but not necessarily at two */
+/* assumes Within_map_boundary() at one space away, but not necessarily at
+ * two */
 static boolean
 blocked_boulder(int dx, int dy)
 {
@@ -2021,7 +2022,7 @@ blocked_boulder(int dx, int dy)
                            don't force them to push it first to find out */
     }
 
-    if (!isok(u.ux + 2 * dx, u.uy + 2 * dy))
+    if (!Within_map_boundary(u.ux + 2 * dx, u.uy + 2 * dy))
         return TRUE;
     if (IS_ROCK(level->locations[u.ux + 2 * dx][u.uy + 2 * dy].typ))
         return TRUE;

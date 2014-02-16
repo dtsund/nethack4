@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-12-29 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Izchak Miller, Mike Stephenson, Steve Linhart, 1989. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -771,7 +771,8 @@ dokick(const struct nh_cmd_arg *arg)
         /* doors can be opened while levitating, so they must be reachable for
            bracing purposes. Possible extension: allow bracing against stuff on
            the side? */
-        if (isok(xx, yy) && !IS_ROCK(level->locations[xx][yy].typ) &&
+        if (Within_map_boundary(xx, yy) && 
+            !IS_ROCK(level->locations[xx][yy].typ) &&
             !IS_DOOR(level->locations[xx][yy].typ) &&
             (!Is_airlevel(&u.uz) || !OBJ_AT(xx, yy))) {
             pline("You have nothing to brace yourself against.");

@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2014-01-12 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Dean Luick, with acknowledgements to Kevin Darcy */
 /* and Dave Cohrs, 1990.                                          */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -972,13 +972,13 @@ swallowed(int first)
     }
 
     swallower = monsndx(u.ustuck->data);
-    /* assume isok(u.ux,u.uy) */
-    left_ok = isok(u.ux - 1, u.uy);
-    rght_ok = isok(u.ux + 1, u.uy);
+    /* assume Within_map_boundary(u.ux,u.uy) */
+    left_ok = Within_map_boundary(u.ux - 1, u.uy);
+    rght_ok = Within_map_boundary(u.ux + 1, u.uy);
     /* 
      *  Display the hero surrounded by the monster's stomach.
      */
-    if (isok(u.ux, u.uy - 1)) {
+    if (Within_map_boundary(u.ux, u.uy - 1)) {
         if (left_ok)
             dbuf_set_effect(u.ux - 1, u.uy - 1,
                             swallow_to_effect(swallower, S_sw_tl));
@@ -994,7 +994,7 @@ swallowed(int first)
     if (rght_ok)
         dbuf_set_effect(u.ux + 1, u.uy, swallow_to_effect(swallower, S_sw_mr));
 
-    if (isok(u.ux, u.uy + 1)) {
+    if (Within_map_boundary(u.ux, u.uy + 1)) {
         if (left_ok)
             dbuf_set_effect(u.ux - 1, u.uy + 1,
                             swallow_to_effect(swallower, S_sw_bl));
@@ -1040,12 +1040,12 @@ under_water(int mode)
     else {
         for (y = lasty - 1; y <= lasty + 1; y++)
             for (x = lastx - 1; x <= lastx + 1; x++)
-                if (isok(x, y))
+                if (Within_map_boundary(x, y))
                     dbuf_set(x, y, S_unexplored, 0, 0, 0, 0, 0, 0, 0, 0);
     }
     for (x = u.ux - 1; x <= u.ux + 1; x++)
         for (y = u.uy - 1; y <= u.uy + 1; y++)
-            if (isok(x, y) && is_pool(level, x, y)) {
+            if (Within_map_boundary(x, y) && is_pool(level, x, y)) {
                 if (Blind && !(x == u.ux && y == u.uy))
                     dbuf_set(x, y, S_unexplored, 0, 0, 0, 0, 0, 0, 0, 0);
                 else
@@ -1425,7 +1425,7 @@ obfuscate_object(int otyp)
 void
 dbuf_set_effect(int x, int y, int eglyph)
 {
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return;
 
     dbuf[y][x].effect = eglyph;
@@ -1434,7 +1434,7 @@ dbuf_set_effect(int x, int y, int eglyph)
 static void
 dbuf_set_object(int x, int y, int oid, int omn)
 {
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return;
 
     dbuf[y][x].obj = obfuscate_object(oid);
@@ -1495,7 +1495,7 @@ void
 dbuf_set(int x, int y, int bg, int trap, int obj, int obj_mn, boolean invis,
          int mon, int monflags, int effect, int branding)
 {
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return;
 
     dbuf[y][x].bg = bg;
@@ -1514,7 +1514,7 @@ dbuf_set(int x, int y, int bg, int trap, int obj, int obj_mn, boolean invis,
 int
 dbuf_get_mon(int x, int y)
 {
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return 0;
 
     return dbuf[y][x].mon;
@@ -1815,7 +1815,7 @@ check_pos(struct level *lev, int x, int y, int which)
 {
     int type;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return which;
     type = lev->locations[x][y].typ;
     if (IS_ROCK(type) || type == CORR || type == SCORR)

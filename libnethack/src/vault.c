@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-12-22 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -665,7 +665,8 @@ gd_move(struct monst *grd)
     /* look around (hor & vert only) for accessible places */
     for (nx = x - 1; nx <= x + 1; nx++)
         for (ny = y - 1; ny <= y + 1; ny++) {
-            if ((nx == x || ny == y) && (nx != x || ny != y) && isok(nx, ny)) {
+            if ((nx == x || ny == y) && (nx != x || ny != y) &&
+                Within_map_boundary(nx, ny)) {
 
                 typ = (crm = &level->locations[nx][ny])->typ;
                 if (!IS_STWALL(typ) && !IS_POOL(typ)) {
@@ -703,7 +704,7 @@ nextpos:
     while ((typ = (crm = &level->locations[nx][ny])->typ) != 0) {
         /* in view of the above we must have IS_WALL(typ) or typ == POOL */
         /* must be a wall here */
-        if (isok(nx + nx - x, ny + ny - y) && !IS_POOL(typ) &&
+        if (Within_map_boundary(nx + nx - x, ny + ny - y) && !IS_POOL(typ) &&
             IS_ROOM(level->locations[nx + nx - x][ny + ny - y].typ)) {
             crm->typ = DOOR;
             crm->doormask = D_NODOOR;

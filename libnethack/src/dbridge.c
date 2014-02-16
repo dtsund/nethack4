@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-10-05 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) 1989 by Jean-Christophe Collet                   */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -32,7 +32,7 @@ is_pool(struct level *lev, int x, int y)
 {
     schar ltyp;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return FALSE;
     ltyp = lev->locations[x][y].typ;
     /* The ltyp == MOAT is not redundant to is_moat due to drawbridges and the
@@ -47,7 +47,7 @@ is_lava(struct level * lev, int x, int y)
 {
     schar ltyp;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return FALSE;
     ltyp = lev->locations[x][y].typ;
     if (ltyp == LAVAPOOL ||
@@ -62,7 +62,7 @@ is_ice(struct level * lev, int x, int y)
 {
     schar ltyp;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return FALSE;
     ltyp = lev->locations[x][y].typ;
     if (ltyp == ICE ||
@@ -77,7 +77,7 @@ is_moat(struct level * lev, int x, int y)
 {
     schar ltyp;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return FALSE;
     ltyp = lev->locations[x][y].typ;
     if (!Is_juiblex_level(&lev->z) &&

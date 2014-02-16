@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2014-01-12 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -2132,7 +2132,7 @@ int
 getargpos(const struct nh_cmd_arg *arg, coord *cc, boolean force, const char *goal)
 {
     /* Did the client specify an (in bounds) position? */
-    if ((arg->argtype & CMD_ARG_POS) && isok(cc->x, cc->y)) {
+    if ((arg->argtype & CMD_ARG_POS) && Within_map_boundary(cc->x, cc->y)) {
         cc->x = arg->pos.x;
         cc->y = arg->pos.y;
         return NHCR_ACCEPTED;
@@ -2305,7 +2305,7 @@ get_adjacent_loc(const char *prompt, const char *emsg, xchar x, xchar y,
     }
     new_x = x + dx;
     new_y = y + dy;
-    if (cc && isok(new_x, new_y)) {
+    if (cc && Within_map_boundary(new_x, new_y)) {
         cc->x = new_x;
         cc->y = new_y;
     } else {

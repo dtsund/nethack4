@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2014-01-01 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Dean Luick, with acknowledgements to Dave Cohrs, 1990. */
 /* NetHack may be freely redistributed.  See license for details.       */
 
@@ -192,7 +192,8 @@ vision_reset(void)
     /* Dig the level */
     for (y = 0; y < ROWNO; y++) {
         dig_left = 0;
-        block = TRUE;   /* location (0,y) is always stone; it's !isok() */
+        /* location (0,y) is always stone; it's !Within_map_boundary() */
+        block = TRUE;
         loc = &level->locations[1][y];
         for (x = 1; x < COLNO; x++, loc += ROWNO)
             if (block != (IS_ROCK(loc->typ) || does_block(level, x, y))) {
@@ -566,7 +567,8 @@ vision_recalc(int control)
 
             for (row = u.uy - 1; row <= u.uy + 1; row++)
                 for (col = u.ux - 1; col <= u.ux + 1; col++) {
-                    if (!isok(col, row) || !is_pool(level, col, row))
+                    if (!Within_map_boundary(col, row) ||
+                        !is_pool(level, col, row))
                         continue;
 
                     next_rmin[row] = min(next_rmin[row], col);

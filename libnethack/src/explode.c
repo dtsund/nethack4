@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (C) 1990 by Ken Arromdee                             */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -119,7 +119,7 @@ explode(int x, int y, int type, /* the same as in zap.c */
     any_shield = visible = FALSE;
     for (i = 0; i < 3; i++)
         for (j = 0; j < 3; j++) {
-            if (!isok(i + x - 1, j + y - 1)) {
+            if (!Within_map_boundary(i + x - 1, j + y - 1)) {
                 explmask[i][j] = 2;
                 continue;
             } else
@@ -544,7 +544,7 @@ scatter(int sx, int sy, /* location of objects to scatter */
                 bhitpos.x = stmp->ox + stmp->dx;
                 bhitpos.y = stmp->oy + stmp->dy;
                 typ = lev->locations[bhitpos.x][bhitpos.y].typ;
-                if (!isok(bhitpos.x, bhitpos.y)) {
+                if (!Within_map_boundary(bhitpos.x, bhitpos.y)) {
                     bhitpos.x -= stmp->dx;
                     bhitpos.y -= stmp->dy;
                     stmp->stopped = TRUE;

@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-12-29 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) 1996 by Jean-Christophe Collet  */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -233,7 +233,7 @@ add_region(struct level *lev, struct region *reg)
     for (i = reg->bounding_box.lx; i <= reg->bounding_box.hx; i++)
         for (j = reg->bounding_box.ly; j <= reg->bounding_box.hy; j++) {
             /* Some lev->regions can cross the level boundaries */
-            if (!isok(i, j))
+            if (!Within_map_boundary(i, j))
                 continue;
             if (MON_AT(level, i, j) && inside_region(reg, i, j))
                 add_mon_to_reg(reg, level->monsters[i][j]);
@@ -266,7 +266,8 @@ remove_region(struct region *reg)
     if (reg->visible)
         for (x = reg->bounding_box.lx; x <= reg->bounding_box.hx; x++)
             for (y = reg->bounding_box.ly; y <= reg->bounding_box.hy; y++)
-                if (isok(x, y) && inside_region(reg, x, y) && cansee(x, y))
+                if (Within_map_boundary(x, y) && inside_region(reg, x, y) &&
+                    cansee(x, y))
                     newsym(x, y);
 
     free_region(reg);

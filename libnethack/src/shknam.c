@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-11-16 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -307,16 +307,20 @@ shkinit(const struct shclass *shp, struct level *lev, struct mkroom *sroom)
     if (sroom->irregular) {
         int rmno = (sroom - lev->rooms) + ROOMOFFSET;
 
-        if (isok(sx - 1, sy) && !lev->locations[sx - 1][sy].edge &&
+        if (Within_map_boundary(sx - 1, sy) &&
+            !lev->locations[sx - 1][sy].edge &&
             (int)lev->locations[sx - 1][sy].roomno == rmno)
             sx--;
-        else if (isok(sx + 1, sy) && !lev->locations[sx + 1][sy].edge &&
+        else if (Within_map_boundary(sx + 1, sy) &&
+                 !lev->locations[sx + 1][sy].edge &&
                  (int)lev->locations[sx + 1][sy].roomno == rmno)
             sx++;
-        else if (isok(sx, sy - 1) && !lev->locations[sx][sy - 1].edge &&
+        else if (Within_map_boundary(sx, sy - 1) &&
+                 !lev->locations[sx][sy - 1].edge &&
                  (int)lev->locations[sx][sy - 1].roomno == rmno)
             sy--;
-        else if (isok(sx, sy + 1) && !lev->locations[sx][sy + 1].edge &&
+        else if (Within_map_boundary(sx, sy + 1) &&
+                 !lev->locations[sx][sy + 1].edge &&
                  (int)lev->locations[sx][sy + 1].roomno == rmno)
             sx++;
         else

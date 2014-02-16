@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2014-01-12 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -1190,7 +1190,7 @@ dosearch0(int aflag)
             fund = 5;
         for (x = u.ux - 1; x < u.ux + 2; x++)
             for (y = u.uy - 1; y < u.uy + 2; y++) {
-                if (!isok(x, y))
+                if (!Within_map_boundary(x, y))
                     continue;
                 if (x != u.ux || y != u.uy) {
                     if (Blind && !aflag)

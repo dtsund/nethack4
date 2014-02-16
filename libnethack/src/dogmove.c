@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-30 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -1047,13 +1047,13 @@ can_reach_location(struct monst *mon, xchar mx, xchar my, xchar fx, xchar fy)
 
     if (mx == fx && my == fy)
         return TRUE;
-    if (!isok(mx, my))
+    if (!Within_map_boundary(mx, my))
         return FALSE;   /* should not happen */
 
     dist = dist2(mx, my, fx, fy);
     for (i = mx - 1; i <= mx + 1; i++) {
         for (j = my - 1; j <= my + 1; j++) {
-            if (!isok(i, j))
+            if (!Within_map_boundary(i, j))
                 continue;
             if (dist2(i, j, fx, fy) >= dist)
                 continue;

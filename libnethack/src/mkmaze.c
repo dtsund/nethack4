@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -35,7 +35,7 @@ iswall(struct level *lev, int x, int y)
 {
     int type;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return FALSE;
     type = lev->locations[x][y].typ;
     return (IS_WALL(type) || IS_DOOR(type) || type == SDOOR ||
@@ -48,7 +48,7 @@ iswall_or_stone(struct level *lev, int x, int y)
     int type;
 
     /* out of bounds = stone */
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return TRUE;
 
     type = lev->locations[x][y].typ;
@@ -60,7 +60,7 @@ iswall_or_stone(struct level *lev, int x, int y)
 static boolean
 is_solid(struct level *lev, int x, int y)
 {
-    return !isok(x, y) || IS_STWALL(lev->locations[x][y].typ);
+    return !Within_map_boundary(x, y) || IS_STWALL(lev->locations[x][y].typ);
 }
 
 
@@ -741,7 +741,8 @@ mazexy(struct level *lev, coord * cc)
 }
 
 /* put a non-diggable boundary around the initial portion of a level map.
- * assumes that no level will initially put things beyond the isok() range.
+ * assumes that no level will initially put things beyond the
+ * Within_map_boundary() range.
  *
  * we can't bound unconditionally on the last line with something in it,
  * because that something might be a niche which was already reachable,
@@ -926,7 +927,7 @@ movebubbles(void)
         for (i = 0, x = b->x; i < (int)b->bm[0]; i++, x++)
             for (j = 0, y = b->y; j < (int)b->bm[1]; j++, y++)
                 if (b->bm[j + 2] & (1 << i)) {
-                    if (!isok(x, y)) {
+                    if (!Within_map_boundary(x, y)) {
                         impossible("movebubbles: bad pos (%d,%d)", x, y);
                         continue;
                     }
@@ -1039,7 +1040,7 @@ water_friction(schar * udx, schar * udy)
         do {
             dy = rn2(3) - 1;    /* -1, 0, 1 */
             y = u.uy + dy;
-        } while (dy && (!isok(x, y) || !is_pool(level, x, y)));
+        } while (dy && (!Within_map_boundary(x, y) || !is_pool(level, x, y)));
         *udx = 0;
         *udy = dy;
         eff = TRUE;
@@ -1049,7 +1050,7 @@ water_friction(schar * udx, schar * udy)
         do {
             dx = rn2(3) - 1;    /* -1 .. 1 */
             x = u.ux + dx;
-        } while (dx && (!isok(x, y) || !is_pool(level, x, y)));
+        } while (dx && (!Within_map_boundary(x, y) || !is_pool(level, x, y)));
         *udy = 0;
         *udx = dx;
         eff = TRUE;
@@ -1142,7 +1143,7 @@ waterbody_name(xchar x, xchar y)
     struct rm *loc;
     schar ltyp;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return "drink"; /* should never happen */
     loc = &level->locations[x][y];
     ltyp = loc->typ;

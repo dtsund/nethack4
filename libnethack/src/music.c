@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) 1989 by Jean-Christophe Collet */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -508,7 +508,7 @@ do_play_instrument(struct obj *instr, const struct nh_cmd_arg *arg)
                 /* Search for the drawbridge */
                 for (y = u.uy - 1; y <= u.uy + 1; y++)
                     for (x = u.ux - 1; x <= u.ux + 1; x++)
-                        if (isok(x, y))
+                        if (Within_map_boundary(x, y))
                             if (find_drawbridge(&x, &y)) {
                                 u.uevent.uheard_tune = 2;       /* tune now
                                                                    fully known */
@@ -527,7 +527,7 @@ do_play_instrument(struct obj *instr, const struct nh_cmd_arg *arg)
                 ok = FALSE;
                 for (y = u.uy - 1; y <= u.uy + 1 && !ok; y++)
                     for (x = u.ux - 1; x <= u.ux + 1 && !ok; x++)
-                        if (isok(x, y))
+                        if (Within_map_boundary(x, y))
                             if (IS_DRAWBRIDGE(level->locations[x][y].typ) ||
                                 is_drawbridge_wall(x, y) >= 0)
                                 ok = TRUE;

@@ -98,7 +98,7 @@ moverock(schar dx, schar dy)
             pline("You're too small to push that %s.", xname(otmp));
             goto cannot_push;
         }
-        if (isok(rx, ry) && !IS_ROCK(level->locations[rx][ry].typ) &&
+        if (Within_map_boundary(rx, ry) && !IS_ROCK(level->locations[rx][ry].typ) &&
             level->locations[rx][ry].typ != IRONBARS &&
             (!IS_DOOR(level->locations[rx][ry].typ) || !(dx && dy) ||
              (!Is_rogue_level(&u.uz) &&
@@ -717,12 +717,12 @@ unexplored(int x, int y)
     const struct trap *ttmp;
     int mem_bg;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return FALSE;
     ttmp = t_at(level, x, y);
     mem_bg = level->locations[x][y].mem_bg;
 
-    if (!isok(x, y))
+    if (!Within_map_boundary(x, y))
         return FALSE;
     if (level->locations[x][y].mem_stepped)
         return FALSE;
@@ -754,13 +754,13 @@ unexplored(int x, int y)
             /* corridors with only unexplored diagonals aren't interesting */
             if (mem_bg == S_corr && i && j)
                 continue;
-            if (isok(x + i, y + j) &&
+            if (Within_map_boundary(x + i, y + j) &&
                 level->locations[x + i][y + j].mem_bg == S_unexplored) {
                 int flag = TRUE;
 
                 for (k = -1; k <= 1; k++)
                     for (l = -1; l <= 1; l++)
-                        if (isok(x + i + k, y + j + l) &&
+                        if (Within_map_boundary(x + i + k, y + j + l) &&
                             level->locations[x + i + k][y + j + l].mem_stepped)
                             flag = FALSE;
                 if (flag)
@@ -917,7 +917,7 @@ findtravelpath(boolean(*guess) (int, int), schar * dx, schar * dy,
                      * By limiting the travel matrix here, space a in the example
                      * above is never included in it, preventing the cycle.
                      */
-                    if (!isok(nx, ny) ||
+                    if (!Within_map_boundary(nx, ny) ||
                         (guess == couldsee_func && !guess(nx, ny)))
                         continue;
 
@@ -1207,7 +1207,8 @@ domove(const struct nh_cmd_arg *arg, enum u_interaction_mode uim)
                 confdir(&dx, &dy);
                 x = u.ux + dx;
                 y = u.uy + dy;
-            } while (!isok(x, y) || bad_rock(youmonst.data, x, y));
+            } while (!Within_map_boundary(x, y) ||
+                     bad_rock(youmonst.data, x, y));
         }
         /* turbulence might alter your actual destination */
         if (u.uinwater) {
@@ -1219,7 +1220,7 @@ domove(const struct nh_cmd_arg *arg, enum u_interaction_mode uim)
             x = u.ux + dx;
             y = u.uy + dy;
         }
-        if (!isok(x, y)) {
+        if (!Within_map_boundary(x, y)) {
             action_completed();
             return 0;
         }
@@ -1700,19 +1701,19 @@ domove(const struct nh_cmd_arg *arg, enum u_interaction_mode uim)
            blind, we'll assume the hero knows about adjacent walls and
            boulders due to being able to see them */
         wallcount = 0;
-        if (isok(u.ux - 1, u.uy))
+        if (Within_map_boundary(u.ux - 1, u.uy))
             wallcount +=
                 IS_ROCK(level->locations[u.ux - 1][u.uy].typ) +
                 ! !sobj_at(BOULDER, level, u.ux - 1, u.uy) * 3;
-        if (isok(u.ux + 1, u.uy))
+        if (Within_map_boundary(u.ux + 1, u.uy))
             wallcount +=
                 IS_ROCK(level->locations[u.ux + 1][u.uy].typ) +
                 ! !sobj_at(BOULDER, level, u.ux + 1, u.uy) * 3;
-        if (isok(u.ux, u.uy - 1))
+        if (Within_map_boundary(u.ux, u.uy - 1))
             wallcount +=
                 IS_ROCK(level->locations[u.ux][u.uy - 1].typ) +
                 ! !sobj_at(BOULDER, level, u.ux, u.uy - 1) * 3;
-        if (isok(u.ux, u.uy + 1))
+        if (Within_map_boundary(u.ux, u.uy + 1))
             wallcount +=
                 IS_ROCK(level->locations[u.ux][u.uy + 1].typ) +
                 ! !sobj_at(BOULDER, level, u.ux, u.uy + 1) * 3;
@@ -2254,13 +2255,18 @@ dopickup(const struct nh_cmd_arg *arg)
 void
 lookaround(enum u_interaction_mode uim)
 {
-    int x, y, i, x0 = 0, y0 = 0, m0 = 1, i0 = 9;
+    int i, x0 = 0, y0 = 0, m0 = 1, i0 = 9;
     int corrct = 0, noturn = 0;
     struct monst *mtmp;
     struct trap *trap;
     boolean farmoving = travelling() || flags.occupation == occ_move;
     boolean aggressive_farmoving = ITEM_INTERACTIVE(uim) && !travelling();
     boolean go2 = !flags.corridorbranch;
+
+    //We need to do three things here.  First, make a few checks that are
+    //independent of the surrounding terrain.  Second, check whether the
+    //terrain around us makes us want to stop.  And third, if we're doing
+    //an aggressive directional farmove, make sure we round corners properly.
 
     /* Grid bugs stop if trying to move diagonal, even if blind.  Maybe */
     /* they polymorphed while in the middle of a long move. */
@@ -2282,12 +2288,17 @@ lookaround(enum u_interaction_mode uim)
         }
     }
 
+    //If we're not farmoving at all, no need to do any checks.
+    //If we are farmoving but blind, we can't see the surrounding squares
+    //anyway.
     if (Blind || !farmoving)
         return;
 
+    //Iterate over the surrounding squares...
+    int x, y;
     for (x = u.ux - 1; x <= u.ux + 1; x++)
         for (y = u.uy - 1; y <= u.uy + 1; y++) {
-            if (!isok(x, y))
+            if (!Within_map_boundary(x, y))
                 continue;
 
             if (u.umonnum == PM_GRID_BUG && x != u.ux && y != u.uy)
@@ -2438,7 +2449,7 @@ monster_nearby(void)
 
     for (x = u.ux - 1; x <= u.ux + 1; x++)
         for (y = u.uy - 1; y <= u.uy + 1; y++) {
-            if (!isok(x, y))
+            if (!Within_map_boundary(x, y))
                 continue;
             if (x == u.ux && y == u.uy)
                 continue;

@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Alex Smith, 2013-12-31 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -1230,7 +1230,7 @@ mon_beside(int x, int y)
         for (j = -1; j <= 1; j++) {
             nx = x + i;
             ny = y + j;
-            if (isok(nx, ny) && MON_AT(level, nx, ny))
+            if (Within_map_boundary(nx, ny) && MON_AT(level, nx, ny))
                 return TRUE;
         }
     return FALSE;
