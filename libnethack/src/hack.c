@@ -1078,11 +1078,6 @@ domove(const struct nh_cmd_arg *arg, enum u_interaction_mode uim)
             return dodown(uim);
     }
 
-    //Farmove and friends don't actually need u.dx and u.dy to sort of work,
-    //but lookaround likes to know what direction we're going.
-    u.dx = dx;
-    u.dy = dy;
-
     u_wipe_engr(rnd(5));
 
     /* Don't allow running, travel or autoexplore when stunned or confused. */
@@ -1135,6 +1130,11 @@ domove(const struct nh_cmd_arg *arg, enum u_interaction_mode uim)
             return 0;
         }
     }
+
+    //Farmove and friends don't actually need u.dx and u.dy to sort of work,
+    //but lookaround likes to know what direction we're going.
+    u.dx = dx;
+    u.dy = dy;
 
     /* Travel hit an obstacle, or domove() was called with dx, dy and dz all
        zero, which they shouldn't do. */
