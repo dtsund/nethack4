@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Sean Hunt, 2014-01-19 */
+/* Last modified by Derrick Sund, 2014-02-16 */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -347,6 +347,9 @@ save_you(struct memfile *mf, struct you *y)
         (y->uevent.udemigod << 19) |
         (y->uevent.ascended << 18);
 
+    //Note: The comment numbers weren't changed when u.last_str_turn was
+    //purged.  I'd fix this, but the numbers look a little suspect anyway.
+    // -dtsund
     mtag(mf, 0, MTAG_YOU);
     mwrite64(mf, y->ubirthday);                                  /*   0 */
 
@@ -367,7 +370,7 @@ save_you(struct memfile *mf, struct you *y)
     mwrite32(mf, y->mhmax);                                      /*  64 */
     mwrite32(mf, y->mtimedone);                                  /*  68 */
     mwrite32(mf, y->ulycn);                                      /*  72 */
-    mwrite32(mf, y->last_str_turn);                              /*  76 */
+
     mwrite32(mf, y->utrap);                                      /*  80 */
     mwrite32(mf, y->utraptype);                                  /*  84 */
     mwrite32(mf, y->uhunger);                                    /*  88 */
