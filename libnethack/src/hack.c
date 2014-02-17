@@ -1078,6 +1078,11 @@ domove(const struct nh_cmd_arg *arg, enum u_interaction_mode uim)
             return dodown(uim);
     }
 
+    //Farmove and friends don't actually need u.dx and u.dy to sort of work,
+    //but lookaround likes to know what direction we're going.
+    u.dx = dx;
+    u.dy = dy;
+
     u_wipe_engr(rnd(5));
 
     /* Don't allow running, travel or autoexplore when stunned or confused. */
@@ -2452,10 +2457,11 @@ lookaround(enum u_interaction_mode uim)
             return;
         }       /* end for loops */
 
-    if (corrct > 2 && !flags.corridorbranch) {
+    if (corrct > 1 && !flags.corridorbranch) {
         //Whoops, we found a branch; we hates those, precious.  Better stop.
         //This behavior is going to be incredibly annoying, and it'd probably
-        //be better to fix it so that fartravel ignores this.
+        //be better to fix it so that directed (not directional) fartravel
+        //ignores this.
         action_completed();
         return;
     }
