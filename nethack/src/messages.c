@@ -350,31 +350,33 @@ update_showlines(void)
     else
         to_return = TRUE;
 
-//    if (merging)
-//        num_to_bump--;
+    if (merging)
+        num_to_bump--;
 
     for (i = num_showlines - 1; i >= num_showlines - num_to_bump; i--)
         free(showlines[i].message);
-//    if (merging)
-//        free(showlines[0].message);
+    if (merging)
+        free(showlines[0].message);
     for (i = num_showlines - 1; i >= num_to_bump; i--)
         showlines[i].message = showlines[i - num_to_bump].message;
-    #if 0
-    for (i = 0; i < num_to_bump; i++) {
-        int read_index = merging ? num_to_bump - i : num_to_bump - i - 1;
-        showlines[i].message = malloc(strlen(wrapped_buf[read_index]) + 1);
-        strcpy(showlines[i].message, wrapped_buf[read_index]);
-        showlines[i].unseen = TRUE;
-        showlines[i].nomerge = FALSE;
-        showlines[i].old = FALSE;
+
+    if (!merging) {
+        for (i = num_to_bump - 1; i >= 0; i--)
+        {
+            showlines[i].message = malloc(strlen(wrapped_buf[num_to_bump - 1 - i]) + 1);
+            strcpy(showlines[i].message, wrapped_buf[num_to_bump - 1 - i]);
+            showlines[i].unseen = TRUE;
+            showlines[i].nomerge = FALSE;
+        }
     }
-    #endif
-    for (i = num_to_bump - 1; i >= 0; i--)
-    {
-        showlines[i].message = malloc(strlen(wrapped_buf[num_to_bump - 1 - i]) + 1);
-        strcpy(showlines[i].message, wrapped_buf[num_to_bump - 1 - i]);
-        showlines[i].unseen = TRUE;
-        showlines[i].nomerge = FALSE;
+    else {
+        for (i = num_to_bump; i >= 0; i--)
+        {
+            showlines[i].message = malloc(strlen(wrapped_buf[num_to_bump - i]) + 1);
+            strcpy(showlines[i].message, wrapped_buf[num_to_bump - i]);
+            showlines[i].unseen = TRUE;
+            showlines[i].nomerge = FALSE;
+        }
     }
     strcpy(intermediate, "\0");
     //XXX: If we're printing a --More-- later, we need to make sure the bottom
