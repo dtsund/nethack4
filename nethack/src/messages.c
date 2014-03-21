@@ -350,7 +350,9 @@ update_showlines(void)
     else
         to_return = TRUE;
 
-    if (merging)
+    //XXX: num_to_bump is sometimes negative, particularly when quitting
+    //XXX: FIX THIS
+    if (merging && num_to_bump > 0)
         num_to_bump--;
 
     for (i = num_showlines - 1; i >= num_showlines - num_to_bump; i--)
@@ -378,7 +380,7 @@ update_showlines(void)
             showlines[i].nomerge = FALSE;
         }
     }
-    strcpy(intermediate, "\0");
+    strcpy(intermediate, "");
     //XXX: If we're printing a --More-- later, we need to make sure the bottom
     //line has enough room for it, and if not, shove a token or two from said
     //bottom line back into intermediate.
