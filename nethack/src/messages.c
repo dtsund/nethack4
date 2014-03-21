@@ -174,12 +174,11 @@ show_msgwin(nh_bool more)
         //XXX: Do colors properly
         while (*p)
             waddch(msgwin, *p++ | curses_color_attr(COLOR_WHITE + 8, 0));
-
-    }
-    if (more) {
-        char *p = " --More--";
-        while (*p)
-            waddch(msgwin, *p++ | curses_color_attr(COLOR_WHITE + 8, 0));
+        if (i == 0 && more) {
+            *p = " --More--";
+            while (*p)
+                waddch(msgwin, *p++ | curses_color_attr(COLOR_WHITE + 8, 0));
+        }
     }
     wnoutrefresh(msgwin);
 }
