@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-03-20 */
+/* Last modified by Derrick Sund, 2014-03-21 */
 /* Copyright (c) Daniel Thaler, 2011.                             */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -26,7 +26,6 @@ static nh_bool stopmore = 0;            /* stop doing input at --More-- */
 static struct msghist_entry *showlines; /* lines to be displayed; noncircular.
                                            showlines[0] is bottom message. */
 static int num_showlines;               /* number of lines in the message buf */
-//static char *intermediate;              /* input buffered in this */
 
 /* Allocates space for settings.msghistory lines of message history, or adjusts
    the message history to the given amount of space if it's already been
@@ -416,7 +415,6 @@ curses_print_message_core(int turn, const char *msg, nh_bool canblock)
     while (keep_going) {
         keep_going = update_showlines(&intermediate, &intermediate_size);
         show_msgwin(keep_going);
-        draw_msgwin();
         if (keep_going)
             keypress_at_more();
     }
