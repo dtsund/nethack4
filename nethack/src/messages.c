@@ -380,9 +380,6 @@ update_showlines(char **intermediate, int *length)
     }
     messagelen = strlen(*intermediate);
     strcpy(*intermediate, "");
-    //XXX: If we're printing a --More-- later, we need to make sure the bottom
-    //line has enough room for it, and if not, shove a token or two from said
-    //bottom line back into intermediate.
     for (i = num_to_bump; i < num_buflines; i++) {
         realloc_strcat(intermediate, length, wrapped_buf[i]);
         if((*intermediate)[strlen(*intermediate) - 1] == '.')
@@ -393,6 +390,27 @@ update_showlines(char **intermediate, int *length)
     }
     //XXX: The above intermediate thing might mangle whitespace somehow.
     //It'll do for prototyping.
+
+    //XXX: If we're printing a --More-- later, we need to make sure the bottom
+    //line has enough room for it, and if not, shove a token or two from said
+    //bottom line back into intermediate.
+    while (showlines[0].message && to_return &&
+           strlen(showlines[0].message) > getmaxx(msgwin) - 9) {
+        /* Find the last space in the current showlines[0]. */
+        char *last;
+        last = strrchr(showlines[0].message, ' ');
+        /* If the showlines[0] string doesn't *have* any whitespace, just
+           kind of split it up anyway. */
+        if (!last)
+            last = showlines[0].message + getmaxx(msgwin) - 9;
+        char *temp = malloc(strlen(*intermediate) + strlen(last) + 1);
+        strcpy(temp, last + 1);
+        strcat(temp, " ");
+        strcat(temp, *intermediate);
+        free(*intermediate);
+        *intermediate = temp;
+        *last = '\0';
+    }
 
     free_wrap(wrapped_buf);
     return to_return;
