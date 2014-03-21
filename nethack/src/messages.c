@@ -26,7 +26,7 @@ static nh_bool stopmore = 0;            /* stop doing input at --More-- */
 static struct msghist_entry *showlines; /* lines to be displayed; noncircular.
                                            showlines[0] is bottom message. */
 static int num_showlines;               /* number of lines in the message buf */
-static char *intermediate;              /* input buffered in this */
+//static char *intermediate;              /* input buffered in this */
 
 /* Allocates space for settings.msghistory lines of message history, or adjusts
    the message history to the given amount of space if it's already been
@@ -175,7 +175,7 @@ show_msgwin(nh_bool more)
         while (*p)
             waddch(msgwin, *p++ | curses_color_attr(COLOR_WHITE + 8, 0));
         if (i == 0 && more) {
-            *p = " --More--";
+            p = " --More--";
             while (*p)
                 waddch(msgwin, *p++ | curses_color_attr(COLOR_WHITE + 8, 0));
         }
@@ -309,7 +309,7 @@ fresh_message_line(nh_bool canblock)
 /* Update the showlines array with new string text from intermediate.
    Returns TRUE if we're going to need a --More-- and another pass. */
 static nh_bool
-update_showlines(void)
+update_showlines(char **intermediate, int *length)
 {
     //Check to see whether the bottom line string needs to be merged.
     //If so, concatenate the string from the bottom line with intermediate,
@@ -323,16 +323,16 @@ update_showlines(void)
     nh_bool merging = FALSE;
     if (showlines[0].message)
         messagelen = strlen(showlines[0].message);
-    char buf[strlen(intermediate) + messagelen + 3];
+    char buf[strlen(*intermediate) + messagelen + 3];
     nh_bool to_return = FALSE;
     if (!showlines[0].nomerge && showlines[0].message) {
         strcpy(buf, showlines[0].message);
         strcat(buf, "  ");
-        strcat(buf, intermediate);
+        strcat(buf, *intermediate);
         merging = TRUE;
     }
     else
-        strcpy(buf, intermediate);
+        strcpy(buf, *intermediate);
     char **wrapped_buf = NULL;
     int num_buflines = 0;
     wrap_text(getmaxx(msgwin), buf, &num_buflines, &wrapped_buf);
@@ -379,16 +379,17 @@ update_showlines(void)
             showlines[i].nomerge = FALSE;
         }
     }
-    strcpy(intermediate, "");
+    messagelen = strlen(*intermediate);
+    strcpy(*intermediate, "");
     //XXX: If we're printing a --More-- later, we need to make sure the bottom
     //line has enough room for it, and if not, shove a token or two from said
     //bottom line back into intermediate.
     for (i = num_to_bump; i < num_buflines; i++) {
-        strcat(intermediate, wrapped_buf[i]);
-        if(intermediate[strlen(intermediate) - 1] == '.')
-            strcat(intermediate, "  ");
+        realloc_strcat(intermediate, length, wrapped_buf[i]);
+        if((*intermediate)[strlen(*intermediate) - 1] == '.')
+            realloc_strcat(intermediate, length, "  ");
         else
-            strcat(intermediate, " ");
+            realloc_strcat(intermediate, length, " ");
         
     }
     //XXX: The above intermediate thing might mangle whitespace somehow.
@@ -405,18 +406,21 @@ curses_print_message_core(int turn, const char *msg, nh_bool canblock)
     if (!histlines)
         alloc_hist_array();
 
-    /* Overallocate for intermediate because update_showlines might stick a
-       "  " on the end of it. */
-    char tempbuf[strlen(msg) + 3];
-    intermediate = tempbuf;
+    //XXX: I tried stack allocating this in a VLA and wound up with mysterious
+    //bus errors.  Usage of intermediate is simple enough that heap is fairly
+    //safe here, but it leaves a bad taste in my mouth.
+    char *intermediate;
+    intermediate = calloc(strlen(msg) + 1, sizeof (char));
+    int intermediate_size = strlen(msg) + 1;
     strcpy(intermediate, msg);
     while (keep_going) {
-        keep_going = update_showlines();
+        keep_going = update_showlines(&intermediate, &intermediate_size);
         show_msgwin(keep_going);
         draw_msgwin();
         if (keep_going)
             keypress_at_more();
     }
+    free(intermediate);
     #if 0
     struct msghist_entry *h;
 
