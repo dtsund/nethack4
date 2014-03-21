@@ -27,6 +27,8 @@ static struct msghist_entry *showlines; /* lines to be displayed; noncircular.
                                            showlines[0] is bottom message. */
 static int num_showlines;               /* number of lines in the message buf */
 
+const static more_text = " --More--";   /* The string to use in more prompts */
+
 /* Allocates space for settings.msghistory lines of message history, or adjusts
    the message history to the given amount of space if it's already been
    allocated. We actually allocate an extra line, so that histlines_pointer can
@@ -174,7 +176,7 @@ show_msgwin(nh_bool more)
         while (*p)
             waddch(msgwin, *p++ | curses_color_attr(COLOR_WHITE + 8, 0));
         if (i == 0 && more) {
-            p = " --More--";
+            p = more_text;
             while (*p)
                 waddch(msgwin, *p++ | curses_color_attr(COLOR_WHITE + 8, 0));
         }
@@ -395,14 +397,14 @@ update_showlines(char **intermediate, int *length)
     //line has enough room for it, and if not, shove a token or two from said
     //bottom line back into intermediate.
     while (showlines[0].message && to_return &&
-           strlen(showlines[0].message) > getmaxx(msgwin) - 9) {
+           strlen(showlines[0].message) > getmaxx(msgwin) - strlen(more_text)) {
         /* Find the last space in the current showlines[0]. */
         char *last;
         last = strrchr(showlines[0].message, ' ');
         /* If the showlines[0] string doesn't *have* any whitespace, just
            kind of split it up anyway. */
         if (!last)
-            last = showlines[0].message + getmaxx(msgwin) - 9;
+            last = showlines[0].message + getmaxx(msgwin) - strlen(more_text);
         char *temp = malloc(strlen(*intermediate) + strlen(last) + 1);
         strcpy(temp, last + 1);
         strcat(temp, " ");
