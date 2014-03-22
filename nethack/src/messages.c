@@ -27,7 +27,7 @@ static struct msghist_entry *showlines; /* lines to be displayed; noncircular.
                                            showlines[0] is bottom message. */
 static int num_showlines;               /* number of lines in the message buf */
 
-static const char* more_text = " --More--";   /* The string to use in more
+static char* more_text = " --More--";   /* The string to use in more
                                                  prompts */
 
 /* Allocates space for settings.msghistory lines of message history, or adjusts
@@ -271,7 +271,7 @@ new_action(void)
 {
     mark_all_seen(TRUE);
     draw_msgwin();
-    #if 0
+
     int hp = first_new;
     int last_hp = hp;
     if (hp == -1)
@@ -280,21 +280,16 @@ new_action(void)
     if (!histlines)
         alloc_hist_array();
 
+    /* Don't merge histlines from different actions. */
     while (hp != histlines_pointer) {
-        histlines[hp].old = 1;
         last_hp = hp;
         hp++;
         hp %= histlines_alloclen;
     }
-
-    /* Don't merge histlines from different actions. */
     histlines[last_hp].nomerge = 1;
 
     first_new = -1;
     stopmore = 0;
-
-    layout_msgwin(1, 0, 0);
-    #endif
 }
 
 static void
@@ -507,31 +502,43 @@ fresh_message_line(nh_bool canblock)
     force_seen();
     if (showlines[0].message)
         move_lines_upward(1);
-    #if 0
-    force_seen(0);
-    last_line_reserved = 1;
-    if (!layout_msgwin(0, 0, 0) && canblock) {
-        layout_msgwin(1, 0, 1);
-        keypress_at_more();
-    }
-    layout_msgwin(1, 0, 0);
-    #endif
 }
 
 static void
 curses_print_message_core(int turn, const char *msg, nh_bool important)
 {
-    
-    if (!important && num_showlines == 1)
-        return;
+    /* First, add the message to the message history.  Do this before deciding
+       whether to print it; "unimportant" messages always show up in ^P. */
+    struct msghist_entry *h;
 
-    nh_bool keep_going = TRUE;
     if (!histlines)
         alloc_hist_array();
 
-    //XXX: I tried stack allocating this in a VLA and wound up with mysterious
-    //bus errors.  Usage of intermediate is simple enough that heap is fairly
-    //safe here, but it leaves a bad taste in my mouth.
+    h = histlines + histlines_pointer;
+
+    free(h->message); /* in case there was something there */
+    h->turn = turn;
+    h->message = malloc(strlen(msg)+1);
+    strcpy(h->message, msg);
+    h->nomerge = 0;
+
+    if (first_new == -1)
+        first_new = histlines_pointer;
+
+    histlines_pointer++;
+    histlines_pointer %= histlines_alloclen;
+
+    free(histlines[histlines_pointer].message);
+    histlines[histlines_pointer].message = 0;
+
+    /* If we're in a small terminal, suppress certain messages, like the one
+       asking in which direction to kick. */
+    if (!important && num_showlines == 1)
+        return;
+
+    /* Now actually print the message. */
+    nh_bool keep_going = TRUE;
+
     char *intermediate;
     intermediate = calloc(strlen(msg) + 1, sizeof (char));
     int intermediate_size = strlen(msg) + 1;
@@ -543,40 +550,6 @@ curses_print_message_core(int turn, const char *msg, nh_bool important)
             keypress_at_more();
     }
     free(intermediate);
-    #if 0
-    struct msghist_entry *h;
-
-    if (!histlines)
-        alloc_hist_array();
-
-    h = histlines + histlines_pointer;
-
-    last_line_reserved = 0;
-
-    free(h->message); /* in case there was something there */
-    h->turn = turn;
-    h->message = malloc(strlen(msg)+1);
-    strcpy(h->message, msg);
-    h->old = 0;
-    h->unseen = canblock;
-    h->nomerge = 0;
-
-    if (first_new == -1)
-        first_new = histlines_pointer;
-    if (first_unseen == -1 && canblock)
-        first_unseen = histlines_pointer;
-
-    histlines_pointer++;
-    histlines_pointer %= histlines_alloclen;
-
-    free(histlines[histlines_pointer].message);
-    histlines[histlines_pointer].message = 0;
-
-    if (!layout_msgwin(0, 0, 0))
-        force_seen(0); /* print a --More-- at the appropriate point */
-    else
-        layout_msgwin(1, 0, 0);
-    #endif
 }
 
 /* Prints a message onto the screen, and into message history. The code will
