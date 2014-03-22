@@ -341,7 +341,7 @@ fresh_message_line(nh_bool canblock)
 /* Update the showlines array with new string text from intermediate.
    Returns TRUE if we're going to need a --More-- and another pass. */
 static nh_bool
-update_showlines(char **intermediate, int *length, nh_bool canblock)
+update_showlines(char **intermediate, int *length)
 {
     /*
      * Each individual step in this can be ugly, but the overall logic isn't
@@ -417,16 +417,8 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
        If we're not merging, we'll need a --More-- if num_to_bump is strictly
        smaller than num_buflines. */
     if ((num_to_bump < num_buflines - 1) ||
-        (!merging && num_to_bump < num_buflines)) {
-        if (!canblock) {
-            /* We'd need a --More-- but the message isn't important enough to
-               warrant one.  So we don't do anything. */
-            free_wrap(wrapped_buf);
-            return FALSE;
-        }
-        else
-            need_more = TRUE;
-    }
+        (!merging && num_to_bump < num_buflines))
+        need_more = TRUE;
 
     if (merging)
         free(showlines[0].message);
@@ -495,8 +487,12 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
 }
 
 static void
-curses_print_message_core(int turn, const char *msg, nh_bool canblock)
+curses_print_message_core(int turn, const char *msg, nh_bool important)
 {
+    
+    if (!important && num_showlines == 1)
+        return;
+
     nh_bool keep_going = TRUE;
     if (!histlines)
         alloc_hist_array();
@@ -509,8 +505,7 @@ curses_print_message_core(int turn, const char *msg, nh_bool canblock)
     int intermediate_size = strlen(msg) + 1;
     strcpy(intermediate, msg);
     while (keep_going) {
-        keep_going = update_showlines(&intermediate, &intermediate_size,
-                                      canblock);
+        keep_going = update_showlines(&intermediate, &intermediate_size);
         show_msgwin(keep_going);
         if (keep_going)
             keypress_at_more();
