@@ -338,6 +338,11 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     int num_buflines = 0;
     wrap_text(getmaxx(msgwin), buf, &num_buflines, &wrapped_buf);
 
+    /* Determine the number of entries in showlines to bump off the top and
+       into the gaping maw of free().  It is bounded above by:
+       1: num_buflines
+       2: the number of showlines that have been seen and can legally be
+          bumped. */
     int num_can_bump = 0;
     int i;
     for (i = 0; i < num_showlines; i++)
@@ -347,14 +352,21 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     int num_to_bump = num_can_bump;
     if (num_to_bump >= num_buflines)
         num_to_bump = num_buflines;
-    else if (!canblock) {
-        /* We'd need a --More-- but the message isn't important enough to
-           warrant one.  So we don't do anything. */
-        free_wrap(wrapped_buf);
-        return FALSE;
+    /* If we're merging, we'll need a --More-- if num_to_bump is smaller than
+       num_buflines - 1.
+       If we're not merging, we'll need a --More-- if num_to_bump is smaller
+       than num_buflines. */
+    if (num_to_bump < num_buflines - 1 ||
+       (!merging && num_to_bump < num_buflines)) {
+        if (!canblock) {
+            /* We'd need a --More-- but the message isn't important enough to
+               warrant one.  So we don't do anything. */
+            free_wrap(wrapped_buf);
+            return FALSE;
+        }
+        else
+            to_return = TRUE;
     }
-    else
-        to_return = TRUE;
 
     //XXX: num_to_bump is sometimes negative, particularly when quitting
     //XXX: FIX THIS
