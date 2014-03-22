@@ -226,28 +226,6 @@ keypress_at_more(void)
     }
 }
 
-#if 0
-/* Ensure that the user has seen all the messages that they're required to see
-   (via displaying them, with --More-- if necessary), finally leaving the last
-   onscreen. If more is set, draw a --More-- after the last set, too. */
-static void
-force_seen(nh_bool more) {
-    if (!layout_msgwin(0, 0, more)) {
-        /* The text so far doesn't fit onto the screen. Draw it, followed by a
-           --More--. */
-        int offset = 1;
-        while (!layout_msgwin(0, offset, 1))
-            offset++;
-        while (offset > 0) {
-            layout_msgwin(1, offset, 1); /* sets unseen to 0 */
-            keypress_at_more();
-            offset -= getmaxy(msgwin);
-        }
-    }
-    layout_msgwin(1, 0, more);
-}
-#endif
-
 /* Draws messages on the screen. Any messages drawn since the last call to
    new_action() are in white; others are in blue. This routine adapts to the
    size of the message buffer.
