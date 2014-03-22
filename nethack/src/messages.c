@@ -373,7 +373,14 @@ update_showlines(char **intermediate, int *length, nh_bool force_more)
     char **wrapped_buf = NULL;
     int num_buflines = 0;
     wrap_text(getmaxx(msgwin), buf, &num_buflines, &wrapped_buf);
-
+    /* Sometimes, this function will be called with an empty string to format
+       properly for a --More--.  This avoids any resulting awkwardness. */
+    if(strlen(wrapped_buf[0]) == 0) {
+        free_wrap(wrapped_buf);
+        wrapped_buf = NULL;
+        num_buflines = 0;
+        merging = FALSE;
+    }
     /* Determine the number of entries in showlines to bump off the top and
        into the gaping maw of free().  It is bounded above by:
        1: num_buflines
@@ -436,7 +443,9 @@ update_showlines(char **intermediate, int *length, nh_bool force_more)
         realloc_strcat(intermediate, length, wrapped_buf[i]);
         /* TODO: Base this on the whitespace in buf rather than trying to divine
            it from punctuation. */
-        if((*intermediate)[strlen(*intermediate) - 1] == '.')
+        if (i == num_buflines - 1)
+            break; /* Don't add unnecessary whitespace. */
+        if ((*intermediate)[strlen(*intermediate) - 1] == '.')
             realloc_strcat(intermediate, length, "  ");
         else
             realloc_strcat(intermediate, length, " ");
@@ -480,6 +489,7 @@ force_seen(void)
     int dummy_length = 1;
     strcpy(dummy, "");
     nh_bool keep_going = TRUE;
+    showlines[0].nomerge = FALSE;
     while (keep_going) {
         keep_going = update_showlines(&dummy, &dummy_length, TRUE);
         show_msgwin(keep_going);
@@ -697,6 +707,9 @@ wrap_text(int width, const char *input, int *output_count, char ***output)
 void
 free_wrap(char **wrap_output)
 {
+    if (!wrap_output)
+        return;
+
     const int max_wrap = 20;
     int idx;
 
