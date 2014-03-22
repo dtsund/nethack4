@@ -425,6 +425,7 @@ update_showlines(char **intermediate, int *length, nh_bool force_more)
             strcpy(showlines[i].message, wrapped_buf[num_to_bump - i]);
             showlines[i].unseen = TRUE;
             showlines[i].nomerge = FALSE;
+            showlines[i].old = FALSE;
         }
     }
 
