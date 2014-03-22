@@ -319,29 +319,10 @@ move_lines_upward(int num_to_bump)
     }
 }
 
-/* Make sure the bottom message line is empty. If this would scroll something
-   off the screen, do a --More-- first if necessary.
-   XXX: I'm not actually sure when --More-- is necessary at all. */
-void
-fresh_message_line(nh_bool canblock)
-{
-    if (showlines[0].message)
-        move_lines_upward(1);
-    #if 0
-    force_seen(0);
-    last_line_reserved = 1;
-    if (!layout_msgwin(0, 0, 0) && canblock) {
-        layout_msgwin(1, 0, 1);
-        keypress_at_more();
-    }
-    layout_msgwin(1, 0, 0);
-    #endif
-}
-
 /* Update the showlines array with new string text from intermediate.
    Returns TRUE if we're going to need a --More-- and another pass. */
 static nh_bool
-update_showlines(char **intermediate, int *length)
+update_showlines(char **intermediate, int *length, nh_bool force_more)
 {
     /*
      * Each individual step in this can be ugly, but the overall logic isn't
@@ -367,7 +348,7 @@ update_showlines(char **intermediate, int *length)
     /* Step 1 begins here. */
     int messagelen = 0;
     nh_bool merging = FALSE;
-    nh_bool need_more = FALSE;
+    nh_bool need_more = force_more && showlines[0].unseen;
     if (showlines[0].message)
         messagelen = strlen(showlines[0].message);
 
@@ -486,6 +467,46 @@ update_showlines(char **intermediate, int *length)
     return need_more;
 }
 
+/* Guarantee the player sees the current message buffer by forcing a more prompt
+   if this is legal. */
+static void
+force_seen(void)
+{
+    /* dummy is just "" initially, but forcing a more in update_showlines might
+       lop a few tokens off the end of showlines[0].message and put them into
+       dummy.  That's why we need to call update_showlines in a loop. */
+    char* dummy = malloc(1);
+    int dummy_length = 1;
+    strcpy(dummy, "");
+    nh_bool keep_going = TRUE;
+    while (keep_going) {
+        keep_going = update_showlines(&dummy, &dummy_length, TRUE);
+        show_msgwin(keep_going);
+        if (keep_going)
+            keypress_at_more();
+    }
+    free(dummy);
+}
+
+/* Make sure the bottom message line is empty. If this would scroll something
+   off the screen, do a --More-- first if necessary. */
+void
+fresh_message_line(nh_bool canblock)
+{
+    force_seen();
+    if (showlines[0].message)
+        move_lines_upward(1);
+    #if 0
+    force_seen(0);
+    last_line_reserved = 1;
+    if (!layout_msgwin(0, 0, 0) && canblock) {
+        layout_msgwin(1, 0, 1);
+        keypress_at_more();
+    }
+    layout_msgwin(1, 0, 0);
+    #endif
+}
+
 static void
 curses_print_message_core(int turn, const char *msg, nh_bool important)
 {
@@ -505,7 +526,7 @@ curses_print_message_core(int turn, const char *msg, nh_bool important)
     int intermediate_size = strlen(msg) + 1;
     strcpy(intermediate, msg);
     while (keep_going) {
-        keep_going = update_showlines(&intermediate, &intermediate_size);
+        keep_going = update_showlines(&intermediate, &intermediate_size, FALSE);
         show_msgwin(keep_going);
         if (keep_going)
             keypress_at_more();
@@ -569,16 +590,7 @@ void
 pause_messages(void)
 {
     stopmore = 0;
-    draw_msgwin();
-    keypress_at_more();
-    #if 0
-    if (first_unseen != -1) {
-        force_seen(1);
-        stopmore = 0;
-        keypress_at_more();
-    }
-    draw_msgwin();
-    #endif
+    force_seen();
 }
 
 /* Displays the message history. */
