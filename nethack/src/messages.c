@@ -174,7 +174,6 @@ show_msgwin(nh_bool more)
         if(!showlines[i].message)
             continue;
         char *p = showlines[i].message;
-        //XXX: Do colors properly
         attr_t color_attr = showlines[i].old ?
             curses_color_attr(COLOR_BLACK, 0) :
             curses_color_attr(COLOR_WHITE, 0);
