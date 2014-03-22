@@ -291,11 +291,36 @@ new_action(void)
     #endif
 }
 
+static void
+move_lines_upward(int num_to_bump)
+{
+    int i;
+    for (i = num_showlines - 1; i >= num_showlines - num_to_bump; i--)
+        free(showlines[i].message);
+    for (i = num_showlines - 1; i >= num_to_bump; i--) {
+        showlines[i].message = showlines[i - num_to_bump].message;
+        showlines[i].turn = showlines[i - num_to_bump].turn;
+        showlines[i].old = showlines[i - num_to_bump].old;
+        showlines[i].unseen = showlines[i - num_to_bump].unseen;
+        showlines[i].nomerge = showlines[i - num_to_bump].nomerge;
+    }
+    for (; i >= 0; i--) {
+        showlines[i].message = NULL;
+        showlines[i].turn = -1;
+        showlines[i].old = TRUE;
+        showlines[i].unseen = FALSE;
+        showlines[i].nomerge = FALSE;
+    }
+}
+
 /* Make sure the bottom message line is empty. If this would scroll something
-   off the screen, do a --More-- first if necessary. */
+   off the screen, do a --More-- first if necessary.
+   XXX: I'm not actually sure when --More-- is necessary at all. */
 void
 fresh_message_line(nh_bool canblock)
 {
+    if (showlines[0].message)
+        move_lines_upward(1);
     #if 0
     force_seen(0);
     last_line_reserved = 1;
@@ -330,6 +355,12 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
         strcpy(buf, showlines[0].message);
         strcat(buf, "  ");
         strcat(buf, *intermediate);
+        merging = TRUE;
+    }
+    else if (!showlines[0].message) {
+        /* Setting merging to TRUE means showlines[0].message will be freed,
+           but free(NULL) is legal. */
+        strcpy(buf, *intermediate);
         merging = TRUE;
     }
     else
@@ -373,12 +404,10 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     if (merging && num_to_bump > 0)
         num_to_bump--;
 
-    for (i = num_showlines - 1; i >= num_showlines - num_to_bump; i--)
-        free(showlines[i].message);
     if (merging)
         free(showlines[0].message);
-    for (i = num_showlines - 1; i >= num_to_bump; i--)
-        showlines[i].message = showlines[i - num_to_bump].message;
+
+    move_lines_upward(num_to_bump);
 
     if (!merging) {
         for (i = num_to_bump - 1; i >= 0; i--)
