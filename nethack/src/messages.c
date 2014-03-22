@@ -27,7 +27,7 @@ static struct msghist_entry *showlines; /* lines to be displayed; noncircular.
                                            showlines[0] is bottom message. */
 static int num_showlines;               /* number of lines in the message buf */
 
-const static more_text = " --More--";   /* The string to use in more prompts */
+static const char* more_text = " --More--";   /* The string to use in more prompts */
 
 /* Allocates space for settings.msghistory lines of message history, or adjusts
    the message history to the given amount of space if it's already been
@@ -310,7 +310,7 @@ fresh_message_line(nh_bool canblock)
 /* Update the showlines array with new string text from intermediate.
    Returns TRUE if we're going to need a --More-- and another pass. */
 static nh_bool
-update_showlines(char **intermediate, int *length)
+update_showlines(char **intermediate, int *length, nh_bool canblock)
 {
     //Check to see whether the bottom line string needs to be merged.
     //If so, concatenate the string from the bottom line with intermediate,
@@ -347,6 +347,12 @@ update_showlines(char **intermediate, int *length)
     int num_to_bump = num_can_bump;
     if (num_to_bump >= num_buflines)
         num_to_bump = num_buflines;
+    else if (!canblock) {
+        /* We'd need a --More-- but the message isn't important enough to
+           warrant one.  So we don't do anything. */
+        free_wrap(wrapped_buf);
+        return FALSE;
+    }
     else
         to_return = TRUE;
 
@@ -433,7 +439,8 @@ curses_print_message_core(int turn, const char *msg, nh_bool canblock)
     int intermediate_size = strlen(msg) + 1;
     strcpy(intermediate, msg);
     while (keep_going) {
-        keep_going = update_showlines(&intermediate, &intermediate_size);
+        keep_going = update_showlines(&intermediate, &intermediate_size,
+                                      canblock);
         show_msgwin(keep_going);
         if (keep_going)
             keypress_at_more();
