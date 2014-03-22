@@ -27,7 +27,8 @@ static struct msghist_entry *showlines; /* lines to be displayed; noncircular.
                                            showlines[0] is bottom message. */
 static int num_showlines;               /* number of lines in the message buf */
 
-static const char* more_text = " --More--";   /* The string to use in more prompts */
+static const char* more_text = " --More--";   /* The string to use in more
+                                                 prompts */
 
 /* Allocates space for settings.msghistory lines of message history, or adjusts
    the message history to the given amount of space if it's already been
@@ -152,7 +153,8 @@ realloc_strcat(char **first, int *first_alloclen, char *second)
     if (strlen_first + strlen_second >= *first_alloclen) {
         int first_was_null = !*first;
 
-        *first_alloclen = ((strlen_first + strlen_second + 1) / 256) * 256 + 256;
+        *first_alloclen = ((strlen_first + strlen_second + 1) / 256)
+                          * 256 + 256;
         *first = realloc(*first, *first_alloclen);
 
         if (first_was_null)
@@ -416,7 +418,8 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     if (!merging) {
         for (i = num_to_bump - 1; i >= 0; i--)
         {
-            showlines[i].message = malloc(strlen(wrapped_buf[num_to_bump - 1 - i]) + 1);
+            showlines[i].message =
+                malloc(strlen(wrapped_buf[num_to_bump - 1 - i]) + 1);
             strcpy(showlines[i].message, wrapped_buf[num_to_bump - 1 - i]);
             showlines[i].unseen = TRUE;
             showlines[i].nomerge = FALSE;
@@ -425,7 +428,8 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     else {
         for (i = num_to_bump; i >= 0; i--)
         {
-            showlines[i].message = malloc(strlen(wrapped_buf[num_to_bump - i]) + 1);
+            showlines[i].message =
+                malloc(strlen(wrapped_buf[num_to_bump - i]) + 1);
             strcpy(showlines[i].message, wrapped_buf[num_to_bump - i]);
             showlines[i].unseen = TRUE;
             showlines[i].nomerge = FALSE;
