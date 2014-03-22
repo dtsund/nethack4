@@ -98,7 +98,7 @@ setup_showlines(void)
     int i;
     for (i = 0; i < num_showlines; i++) {
         showlines[i].turn = -1;
-        showlines[i].old = TRUE;
+        showlines[i].old = FALSE;
         showlines[i].unseen = FALSE;
         showlines[i].nomerge = FALSE;
     }
@@ -173,8 +173,11 @@ show_msgwin(nh_bool more)
             continue;
         char *p = showlines[i].message;
         //XXX: Do colors properly
+        attr_t color_attr = showlines[i].old ?
+            curses_color_attr(COLOR_BLACK, 0) :
+            curses_color_attr(COLOR_WHITE, 0);
         while (*p)
-            waddch(msgwin, *p++ | curses_color_attr(COLOR_WHITE + 8, 0));
+            waddch(msgwin, *p++ | color_attr);
         if (i == 0 && more) {
             p = more_text;
             while (*p)
@@ -265,6 +268,7 @@ void
 new_action(void)
 {
     mark_all_seen(TRUE);
+    draw_msgwin();
     #if 0
     int hp = first_new;
     int last_hp = hp;
@@ -307,7 +311,7 @@ move_lines_upward(int num_to_bump)
     for (; i >= 0; i--) {
         showlines[i].message = NULL;
         showlines[i].turn = -1;
-        showlines[i].old = TRUE;
+        showlines[i].old = FALSE;
         showlines[i].unseen = FALSE;
         showlines[i].nomerge = FALSE;
     }
