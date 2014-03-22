@@ -1,5 +1,5 @@
 /* vim:set cin ft=c sw=4 sts=4 ts=8 et ai cino=Ls\:0t0(0 : -*- mode:c;fill-column:80;tab-width:8;c-basic-offset:4;indent-tabs-mode:nil;c-file-style:"k&r" -*-*/
-/* Last modified by Derrick Sund, 2014-03-21 */
+/* Last modified by Derrick Sund, 2014-03-22 */
 /* Copyright (c) Daniel Thaler, 2011.                             */
 /* NetHack may be freely redistributed.  See license for details. */
 
@@ -407,12 +407,17 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     int num_to_bump = num_can_bump;
     if (num_to_bump >= num_buflines)
         num_to_bump = num_buflines;
-    /* If we're merging, we'll need a --More-- if num_to_bump is smaller than
-       num_buflines - 1.
-       If we're not merging, we'll need a --More-- if num_to_bump is smaller
-       than num_buflines. */
-    if (num_to_bump < num_buflines - 1 ||
-       (!merging && num_to_bump < num_buflines)) {
+    //XXX: num_to_bump is sometimes negative, particularly when quitting
+    //XXX: FIX THIS
+    if (merging && num_to_bump > 0)
+        num_to_bump--;
+
+    /* If we're merging, we'll need a --More-- if num_to_bump is strictly
+       smaller than num_buflines - 1.
+       If we're not merging, we'll need a --More-- if num_to_bump is strictly
+       smaller than num_buflines. */
+    if ((num_to_bump < num_buflines - 1) ||
+        (!merging && num_to_bump < num_buflines)) {
         if (!canblock) {
             /* We'd need a --More-- but the message isn't important enough to
                warrant one.  So we don't do anything. */
@@ -422,11 +427,6 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
         else
             need_more = TRUE;
     }
-
-    //XXX: num_to_bump is sometimes negative, particularly when quitting
-    //XXX: FIX THIS
-    if (merging && num_to_bump > 0)
-        num_to_bump--;
 
     if (merging)
         free(showlines[0].message);
@@ -458,7 +458,7 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     /* Step 4 begins here. */
     messagelen = strlen(*intermediate);
     strcpy(*intermediate, "");
-    for (i = num_to_bump; i < num_buflines; i++) {
+    for (i = merging ? num_to_bump + 1 : num_to_bump; i < num_buflines; i++) {
         realloc_strcat(intermediate, length, wrapped_buf[i]);
         /* TODO: Base this on the whitespace in buf rather than trying to divine
            it from punctuation. */
