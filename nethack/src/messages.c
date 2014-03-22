@@ -343,20 +343,36 @@ fresh_message_line(nh_bool canblock)
 static nh_bool
 update_showlines(char **intermediate, int *length, nh_bool canblock)
 {
-    //Check to see whether the bottom line string needs to be merged.
-    //If so, concatenate the string from the bottom line with intermediate,
-    //pass that into wrap_text, and see what falls out.  If we can fit the
-    //resulting series of strings into showlines by bumping the stuff we don't
-    //care about anymore, great.  Otherwise, bump as much as we can off, leave
-    //enough room for a --More-- at the end of the last printed one, and concat
-    //and copy the rest back into intermediate.
-    //If it doesn't need to be merged... do all that minus the first step.
+    /*
+     * Each individual step in this can be ugly, but the overall logic isn't
+     * terribly complicated.
+     * STEP 1: Determine whether the string already present in showlines[0]
+     *         (that is, the one at the bottom of the message window) should be
+     *         merged with the text in intermediate.  Create a new buffer, buf,
+     *         out of the combination of (possibly) the text from showlines[0]
+     *         and the text from intermediate.
+     * STEP 2: Wrap the buffer we got in Step 1.  Count how many showlines we
+     *         can and should bump upward to make room for the new text.  If
+     *         we can't make enough room to fit all of the wrapped lines from
+     *         buf, make a note that we're going to need another pass/more.
+     * STEP 3: Shift the showlines messages, freeing the ones that fall off the
+     *         end, and put the wrapped lines in the freed slots.
+     * STEP 4: Wipe out intermediate, and reconstruct it by concatenating the
+     *         lines (if any exist) we couldn't fit in Step 3.
+     * STEP 5: If we need another pass, strip tokens off the end of showlines[0]
+     *         and shove them into the beginning of intermediate until we have
+     *         room for a more prompt.
+     */
+    
+    /* Step 1 begins here. */
     int messagelen = 0;
     nh_bool merging = FALSE;
+    nh_bool need_more = FALSE;
     if (showlines[0].message)
         messagelen = strlen(showlines[0].message);
+
     char buf[strlen(*intermediate) + messagelen + 3];
-    nh_bool to_return = FALSE;
+
     if (!showlines[0].nomerge && showlines[0].message) {
         strcpy(buf, showlines[0].message);
         strcat(buf, "  ");
@@ -371,6 +387,8 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     }
     else
         strcpy(buf, *intermediate);
+
+    /* Step 2 begins here. */
     char **wrapped_buf = NULL;
     int num_buflines = 0;
     wrap_text(getmaxx(msgwin), buf, &num_buflines, &wrapped_buf);
@@ -402,7 +420,7 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
             return FALSE;
         }
         else
-            to_return = TRUE;
+            need_more = TRUE;
     }
 
     //XXX: num_to_bump is sometimes negative, particularly when quitting
@@ -413,6 +431,7 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     if (merging)
         free(showlines[0].message);
 
+    /* Step 3 begins here. */
     move_lines_upward(num_to_bump);
 
     if (!merging) {
@@ -435,10 +454,14 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
             showlines[i].nomerge = FALSE;
         }
     }
+
+    /* Step 4 begins here. */
     messagelen = strlen(*intermediate);
     strcpy(*intermediate, "");
     for (i = num_to_bump; i < num_buflines; i++) {
         realloc_strcat(intermediate, length, wrapped_buf[i]);
+        /* TODO: Base this on the whitespace in buf rather than trying to divine
+           it from punctuation. */
         if((*intermediate)[strlen(*intermediate) - 1] == '.')
             realloc_strcat(intermediate, length, "  ");
         else
@@ -448,10 +471,8 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     //XXX: The above intermediate thing might mangle whitespace somehow.
     //It'll do for prototyping.
 
-    //XXX: If we're printing a --More-- later, we need to make sure the bottom
-    //line has enough room for it, and if not, shove a token or two from said
-    //bottom line back into intermediate.
-    while (showlines[0].message && to_return &&
+    /* Step 5 begins here. */
+    while (showlines[0].message && need_more &&
            strlen(showlines[0].message) > getmaxx(msgwin) - strlen(more_text)) {
         /* Find the last space in the current showlines[0]. */
         char *last;
@@ -470,7 +491,7 @@ update_showlines(char **intermediate, int *length, nh_bool canblock)
     }
 
     free_wrap(wrapped_buf);
-    return to_return;
+    return need_more;
 }
 
 static void
