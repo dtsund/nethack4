@@ -1165,7 +1165,7 @@ potionhit(struct monst *mon, struct obj *obj, boolean your_fault)
             }
             break;
         case POT_POLYMORPH:
-            bhitm(mon, obj);
+            poly_mons(mon, oclass_power(POTION_CLASS), POT_POLYMORPH);
             break;
 /*
         case POT_GAIN_LEVEL:

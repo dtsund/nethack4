@@ -248,7 +248,7 @@ extern void digactualhole(int, int, struct monst *, int);
 extern int use_pick_axe(struct obj *, const struct nh_cmd_arg *);
 extern boolean mdig_tunnel(struct monst *);
 extern void watch_warn(struct monst *, xchar, xchar, boolean);
-extern void zap_dig(schar, schar, schar);
+extern int zap_dig(schar, schar, schar, boolean *);
 extern void bury_objs(struct level *, int, int);
 extern void unearth_objs(struct level *lev, int x, int y);
 extern void rot_organic(void *, long);
@@ -826,7 +826,6 @@ extern boolean peace_minded(const struct permonst *);
 extern void set_malign(struct monst *);
 extern void set_mimic_sym(struct monst *mtmp, struct level *lev);
 extern int mbirth_limit(int);
-extern void mimic_hit_msg(struct monst *, short);
 extern void mkmonmoney(struct monst *, long);
 extern void bagotricks(struct obj *);
 extern boolean propagate(int, boolean, boolean);
@@ -1101,6 +1100,8 @@ extern void golemeffects(struct monst *, int, int);
 extern boolean angry_guards(boolean);
 extern void pacify_guards(void);
 extern long mm_aggression(struct monst *, struct monst *);
+extern void mimic_hit_msg(struct monst *, enum spell_type);
+extern void poly_mons(struct monst *, int, int);
 
 /* ### mondata.c ### */
 
@@ -1949,7 +1950,11 @@ extern void show_conduct(int);
 
 /* ### zap.c ### */
 
-extern int bhitm(struct monst *, struct obj *);
+extern enum spell_type otyp_to_spell(int);
+extern int get_spell_range(enum spell_type, boolean tracer);
+extern int spell_hit_mons(struct monst *, enum spell_source, enum spell_type,
+                          int);
+extern int bhitm(struct monst *, struct obj *); /* DEPRECATED */
 extern void probe_monster(struct monst *);
 extern boolean get_obj_location(const struct obj *, xchar *, xchar *, int);
 extern boolean get_mon_location(struct monst *, xchar *, xchar *, int);
@@ -1969,7 +1974,7 @@ extern int zappable(struct obj *);
 extern void zapnodir(struct obj *);
 extern int dozap(const struct nh_cmd_arg *);
 extern int zapyourself(struct obj *, boolean);
-extern boolean cancel_monst(struct monst *, struct obj *, boolean, boolean,
+extern boolean cancel_monst(struct monst *, int power, boolean, boolean,
                             boolean);
 extern void weffects(struct obj *, schar, schar, schar);
 extern int spell_damage_bonus(void);
@@ -1982,14 +1987,17 @@ extern struct monst *beam_hit(int, int, int, int,
                               boolean *);
 extern struct monst *boomhit(int, int);
 extern int burn_floor_paper(struct level *, int, int, boolean, boolean);
-extern void buzz(int, int, xchar, xchar, int, int);
+extern boolean buzz(enum spell_type, enum spell_source, xchar, xchar, int, int,
+                    int, int, short, boolean);
 extern void melt_ice(struct level *, xchar, xchar);
 extern int zap_over_floor(xchar, xchar, int, boolean *);
 extern void fracture_rock(struct obj *);
 extern boolean break_statue(struct obj *);
 extern void destroy_item(int, int);
 extern int destroy_mitem(struct monst *, int, int);
+extern int resist_power(struct monst *, int, int, int);
 extern int resist(struct monst *, char, int, int);
+extern int oclass_power(char);
 extern void makewish(void);
 
 #endif /* EXTERN_H */

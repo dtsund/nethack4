@@ -794,7 +794,8 @@ magicbane_hit(struct monst *magr,   /* attacker */
         /* No mdef->mcan check: even a cancelled monster can be polymorphed
            into a golem, and the "cancel" effect acts as if some magical energy 
            remains in spellcasting defenders to be absorbed later. */
-        if (!cancel_monst(mdef, mb, youattack, FALSE, FALSE)) {
+        if (!cancel_monst(mdef, oclass_power(WEAPON_CLASS), youattack, FALSE,
+            FALSE)) {
             resisted = TRUE;
         } else {
             do_stun = FALSE;

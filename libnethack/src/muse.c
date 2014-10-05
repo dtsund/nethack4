@@ -1079,6 +1079,7 @@ find_offensive(struct monst * mtmp, struct musable * m)
 #undef nomore
 }
 
+/* TODO: Merge this functionality into zap.c zap_hit_mons. */
 static int
 mbhitm(struct monst *mtmp, struct obj *otmp)
 {
@@ -1143,8 +1144,7 @@ mbhitm(struct monst *mtmp, struct obj *otmp)
         }
         break;
     case WAN_CANCELLATION:
-    case SPE_CANCELLATION:
-        cancel_monst(mtmp, otmp, FALSE, TRUE, FALSE);
+        cancel_monst(mtmp, oclass_power(WAND_CLASS), FALSE, TRUE, FALSE);
         break;
     }
     if (reveal_invis) {
@@ -1281,9 +1281,12 @@ use_offensive(struct monst *mtmp, struct musable *m)
         if (oseen)
             makeknown(otmp->otyp);
         m_using = TRUE;
+        // FIXME: Need to update this buzz call to use an explicit spell and
+        // explicit number of dice.
+        /*
         buzz((int)(-30 - (otmp->otyp - WAN_MAGIC_MISSILE)),
              (otmp->otyp == WAN_MAGIC_MISSILE) ? 2 : 6, mtmp->mx, mtmp->my,
-             sgn(tbx), sgn(tby));
+             sgn(tbx), sgn(tby));*/
         m_using = FALSE;
         return (mtmp->mhp <= 0) ? 1 : 2;
     case MUSE_FIRE_HORN:
@@ -1295,8 +1298,10 @@ use_offensive(struct monst *mtmp, struct musable *m)
             You_hear("a horn being played.");
         otmp->spe--;
         m_using = TRUE;
+        // FIXME: See above.
+        /*
         buzz(-30 - ((otmp->otyp == FROST_HORN) ? AD_COLD - 1 : AD_FIRE - 1),
-             rn1(6, 6), mtmp->mx, mtmp->my, sgn(tbx), sgn(tby));
+             rn1(6, 6), mtmp->mx, mtmp->my, sgn(tbx), sgn(tby)); */
         m_using = FALSE;
         return (mtmp->mhp <= 0) ? 1 : 2;
     case MUSE_WAN_TELEPORTATION:

@@ -1143,18 +1143,17 @@ mdig_tunnel(struct monst *mtmp)
 }
 
 
-/* zap_dig: digging via wand zap or spell cast
+/* zap_dig: digging via wand zap or spell cast.  Digs out a single square.
  * 
  * dig for digdepth positions; also down on request of Lennart Augustsson.
  */
-void
-zap_dig(schar dx, schar dy, schar dz)
+int
+zap_dig(schar x, schar y, schar dz, boolean *shop_damage)
 {
     struct rm *room;
     struct monst *mtmp;
     struct obj *otmp;
-    struct tmp_sym *tsym;
-    int zx, zy, digdepth;
+    int beam_decay = 0;
     boolean shopdoor, shopwall, maze_dig;
 
     /* swallowed */
@@ -1168,21 +1167,22 @@ zap_dig(schar dx, schar dy, schar dz)
             mtmp->mhp = 1;      /* almost dead */
             expels(mtmp, mtmp->data, !is_animal(mtmp->data));
         }
-        return;
+        /* Kill all remaining dig distance. */
+        return -1000;
     }
 
     /* up or down */
     if (dz) {
         if (!Is_airlevel(&u.uz) && !Is_waterlevel(&u.uz) && !Underwater) {
-            if (dz < 0 || On_stairs(u.ux, u.uy)) {
-                if (On_stairs(u.ux, u.uy))
+            if (dz < 0 || On_stairs(x, y)) {
+                if (On_stairs(x, y))
                     pline("The beam bounces off the %s and hits the %s.",
-                          ((u.ux == level->dnladder.sx &&
-                            u.uy == level->dnladder.sy) ||
-                           (u.ux == level->upladder.sx &&
-                            u.uy == level->upladder.sy)) ? "ladder" : "stairs",
-                          ceiling(u.ux, u.uy));
-                pline("You loosen a rock from the %s.", ceiling(u.ux, u.uy));
+                          ((x == level->dnladder.sx &&
+                            y == level->dnladder.sy) ||
+                           (x == level->upladder.sx &&
+                            y == level->upladder.sy)) ? "ladder" : "stairs",
+                          ceiling(x, y));
+                pline("You loosen a rock from the %s.", ceiling(x, y));
                 pline("It falls on your %s!", body_part(HEAD));
                 losehp(rnd((uarmh && is_metallic(uarmh)) ? 2 : 6),
                        killer_msg(DIED, msgcat_many(
@@ -1193,103 +1193,94 @@ zap_dig(schar dx, schar dy, schar dz)
                     xname(otmp);        /* set dknown, maybe bknown */
                     stackobj(otmp);
                 }
-                newsym(u.ux, u.uy);
+                newsym(x, y);
             } else {
-                watch_warn(NULL, u.ux, u.uy, TRUE);
+                watch_warn(NULL, x, y, TRUE);
                 dighole(FALSE);
             }
         }
-        return;
+        /* Kill all remaining dig distance. */
+        return -1000;
     }
 
     /* normal case: digging across the level */
     shopdoor = shopwall = FALSE;
     maze_dig = level->flags.is_maze_lev && !Is_earthlevel(&u.uz);
-    zx = u.ux + dx;
-    zy = u.uy + dy;
-    digdepth = rn1(18, 8);
-    tsym = tmpsym_init(DISP_BEAM, dbuf_effect(E_MISC, E_digbeam));
-    while (--digdepth >= 0) {
-        if (!isok(zx, zy))
-            break;
-        room = &level->locations[zx][zy];
-        tmpsym_at(tsym, zx, zy);
-        win_delay_output();     /* wait a little bit */
-        if (closed_door(level, zx, zy) || room->typ == SDOOR) {
-            if (*in_rooms(level, zx, zy, SHOPBASE)) {
-                add_damage(zx, zy, 400L);
-                shopdoor = TRUE;
-            }
-            if (room->typ == SDOOR)
-                room->typ = DOOR;
-            else if (cansee(zx, zy))
-                pline("The door is razed!");
-            watch_warn(NULL, zx, zy, TRUE);
-            room->doormask = D_NODOOR;
-            unblock_point(zx, zy);      /* vision */
-            digdepth -= 2;
-            if (maze_dig)
-                break;
-        } else if (maze_dig) {
-            if (IS_WALL(room->typ)) {
-                if (!(room->wall_info & W_NONDIGGABLE)) {
-                    if (*in_rooms(level, zx, zy, SHOPBASE)) {
-                        add_damage(zx, zy, 200L);
-                        shopwall = TRUE;
-                    }
-                    room->typ = ROOM;
-                    unblock_point(zx, zy);      /* vision */
-                } else if (!Blind)
-                    pline("The wall glows then fades.");
-                break;
-            } else if (IS_TREE(room->typ)) {    /* check trees before stone */
-                if (!(room->wall_info & W_NONDIGGABLE)) {
-                    room->typ = ROOM;
-                    unblock_point(zx, zy);      /* vision */
-                } else if (!Blind)
-                    pline("The tree shudders but is unharmed.");
-                break;
-            } else if (room->typ == STONE || room->typ == SCORR) {
-                if (!(room->wall_info & W_NONDIGGABLE)) {
-                    room->typ = CORR;
-                    unblock_point(zx, zy);      /* vision */
-                } else if (!Blind)
-                    pline("The rock glows then fades.");
-                break;
-            }
-        } else if (IS_ROCK(room->typ)) {
-            if (!may_dig(level, zx, zy))
-                break;
-            if (IS_WALL(room->typ) || room->typ == SDOOR) {
-                if (*in_rooms(level, zx, zy, SHOPBASE)) {
-                    add_damage(zx, zy, 200L);
+    /* Digging rays don't bounce and don't go past the level boundary */
+    if (!isok(x, y))
+        return -1000;
+    room = &level->locations[x][y];
+    win_delay_output();     /* wait a little bit */
+    if (closed_door(level, x, y) || room->typ == SDOOR) {
+        if (*in_rooms(level, x, y, SHOPBASE)) {
+            add_damage(x, y, 400L);
+            shopdoor = TRUE;
+        }
+        if (room->typ == SDOOR)
+            room->typ = DOOR;
+        else if (cansee(x, y))
+            pline("The door is razed!");
+        watch_warn(NULL, x, y, TRUE);
+        room->doormask = D_NODOOR;
+        unblock_point(x, y);      /* vision */
+        beam_decay -= 1;
+        if (maze_dig)
+            return beam_decay;
+    } else if (maze_dig) {
+        if (IS_WALL(room->typ)) {
+            if (!(room->wall_info & W_NONDIGGABLE)) {
+                if (*in_rooms(level, x, y, SHOPBASE)) {
+                    add_damage(x, y, 200L);
                     shopwall = TRUE;
                 }
-                watch_warn(NULL, zx, zy, TRUE);
-                if (level->flags.is_cavernous_lev && !in_town(zx, zy)) {
-                    room->typ = CORR;
-                } else {
-                    room->typ = DOOR;
-                    room->doormask = D_NODOOR;
-                }
-                digdepth -= 2;
-            } else if (IS_TREE(room->typ)) {
                 room->typ = ROOM;
-                digdepth -= 2;
-            } else {    /* IS_ROCK but not IS_WALL or SDOOR */
+                unblock_point(x, y);      /* vision */
+            } else if (!Blind)
+                pline("The wall glows then fades.");
+            return beam_decay;
+        } else if (IS_TREE(room->typ)) {    /* check trees before stone */
+            if (!(room->wall_info & W_NONDIGGABLE)) {
+                room->typ = ROOM;
+                unblock_point(x, y);      /* vision */
+            } else if (!Blind)
+                pline("The tree shudders but is unharmed.");
+            return beam_decay;
+        } else if (room->typ == STONE || room->typ == SCORR) {
+            if (!(room->wall_info & W_NONDIGGABLE)) {
                 room->typ = CORR;
-                digdepth--;
-            }
-            unblock_point(zx, zy);      /* vision */
+                unblock_point(x, y);      /* vision */
+            } else if (!Blind)
+                pline("The rock glows then fades.");
+            return beam_decay;
         }
-        zx += dx;
-        zy += dy;
-    }   /* while */
+    } else if (IS_ROCK(room->typ)) {
+        if (!may_dig(level, x, y))
+            return beam_decay;
+        if (IS_WALL(room->typ) || room->typ == SDOOR) {
+            if (*in_rooms(level, x, y, SHOPBASE)) {
+                add_damage(x, y, 200L);
+                shopwall = TRUE;
+            }
+            watch_warn(NULL, x, y, TRUE);
+            if (level->flags.is_cavernous_lev && !in_town(x, y)) {
+                room->typ = CORR;
+            } else {
+                room->typ = DOOR;
+                room->doormask = D_NODOOR;
+            }
+            beam_decay -= 1;
+        } else if (IS_TREE(room->typ)) {
+            room->typ = ROOM;
+            beam_decay -= 1;
+        } else {    /* IS_ROCK but not IS_WALL or SDOOR */
+            room->typ = CORR;
+        }
+        unblock_point(x, y);      /* vision */
+    }
 
-    tmpsym_end(tsym);
     if (shopdoor || shopwall)
-        pay_for_damage(shopdoor ? "destroy" : "dig into", FALSE);
-    return;
+        *shop_damage = TRUE;
+    return beam_decay;
 }
 
 /* move objects from level->objlist/nexthere lists to buriedobjlist, keeping

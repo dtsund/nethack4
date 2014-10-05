@@ -2820,7 +2820,7 @@ do_break_wand(struct obj *obj)
                 }
                 bot();      /* blindness */
             } else if ((mon = m_at(level, x, y)) != 0) {
-                bhitm(mon, obj);
+                bhitm(mon, obj); /* TODO: Call spell_hit_mons instead */
                 /* bot(); */
             }
             if (affects_objects && level->objects[x][y]) {

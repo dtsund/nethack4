@@ -2848,7 +2848,7 @@ pacify_guards(void)
 }
 
 void
-mimic_hit_msg(struct monst *mtmp, short otyp)
+mimic_hit_msg(struct monst *mtmp, enum spell_type spell)
 {
     short ap = mtmp->mappearance;
 
@@ -2858,11 +2858,40 @@ mimic_hit_msg(struct monst *mtmp, short otyp)
     case M_AP_MONSTER:
         break;
     case M_AP_OBJECT:
-        if (otyp == SPE_HEALING || otyp == SPE_EXTRA_HEALING) {
+        if (spell == spell_healing || spell == spell_extra_healing) {
             pline("%s seems a more vivid %s than before.",
                   The(simple_typename(ap)), c_obj_colors[objects[ap].oc_color]);
         }
         break;
+    }
+}
+
+void
+poly_mons(struct monst *mtmp, int power, int otyp)
+{
+    if (resists_magm(mtmp)) {
+        /* magic resistance protects from polymorph traps, so make it guard 
+           against involuntary polymorph attacks too... */
+        shieldeff(mtmp->mx, mtmp->my);
+    } else if (!resist_power(mtmp, power, 0, NOTELL)) { /* FIXME */
+        /* natural shapechangers aren't affected by system shock (unless
+           protection from shapechangers is interfering with their
+           metabolism...) */
+        if (mtmp->cham == CHAM_ORDINARY && !rn2(25)) {
+            if (canseemon(mtmp)) {
+                pline("%s shudders!", Monnam(mtmp));
+                makeknown(otyp);
+            }
+            /* dropped inventory shouldn't be hit by this zap */
+            for (struct obj* obj = mtmp->minvent; obj; obj = obj->nobj)
+                bypass_obj(obj);
+            /* flags.bypasses = TRUE; ## for make_corpse() */
+            /* no corpse after system shock */
+            xkilled(mtmp, 3);
+        } else if (newcham(mtmp, NULL, (otyp != POT_POLYMORPH), FALSE)) {
+            if (!Hallucination && canspotmon(mtmp))
+                makeknown(otyp);
+        }
     }
 }
 

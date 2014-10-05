@@ -846,8 +846,11 @@ buzzmu(struct monst *mtmp, const struct attack *mattk)
             if (canseemon(mtmp))
                 pline("%s zaps you with a %s!", Monnam(mtmp),
                       flash_types[ad_to_typ(mattk->adtyp)]);
+            // FIXME: Need to update this buzz call to use an explicit spell and
+            // explicit number of dice.
+            /*
             buzz(-ad_to_typ(mattk->adtyp), (int)mattk->damn, mtmp->mx, mtmp->my,
-                 sgn(tbx), sgn(tby));
+                 sgn(tbx), sgn(tby));*/
         }
     }
     return 1;

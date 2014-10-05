@@ -400,8 +400,12 @@ do_improvisation(struct obj *instr, const struct nh_cmd_arg *arg)
                                           uhim())));
                 }
             } else {
-                buzz((instr->otyp == FROST_HORN) ? AD_COLD - 1 : AD_FIRE - 1,
-                     rn1(6, 6), u.ux, u.uy, dx, dy);
+                enum spell_type spell = (instr->otyp == FROST_HORN ?
+                                                        spell_cold_bolt:
+                                                        spell_fire_bolt);
+                int range = get_spell_range(spell, FALSE);
+                buzz(spell, source_player_wand, u.ux, u.uy, dx, dy, 0, 12,
+                     range, FALSE);
             }
             makeknown(instr->otyp);
             break;

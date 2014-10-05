@@ -691,7 +691,8 @@ ghod_hitsu(struct monst *priest)
     }
 
     /* bolt of lightning */
-    buzz(-10 - (AD_ELEC - 1), 6, x, y, sgn(tbx), sgn(tby));
+    buzz(spell_lightning_bolt, source_monster_spell, x, y, sgn(tbx), sgn(tby),
+         0, 6, get_spell_range(spell_lightning_bolt, FALSE), FALSE);
     exercise(A_WIS, FALSE);
 }
 

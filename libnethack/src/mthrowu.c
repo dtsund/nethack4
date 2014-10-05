@@ -900,8 +900,11 @@ bream(struct monst *mtmp, struct monst *mdef, const struct attack *mattk)
                     pline("%s breathes %s!", Monnam(mtmp), breathwep[typ - 1]);
                     action_interrupted();
                 }
+                // FIXME: Need to update this buzz call to use an explicit spell and
+                // explicit number of dice.
+                /*
                 buzz((int)(-20 - (typ - 1)), (int)mattk->damn, mtmp->mx,
-                     mtmp->my, sgn(tbx), sgn(tby));
+                     mtmp->my, sgn(tbx), sgn(tby));*/
                 /* breath runs out sometimes. Also, give monster some cunning;
                    don't breath if the target fell asleep. */
                 if (!rn2(3))

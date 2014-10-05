@@ -15,11 +15,21 @@
 static boolean obj_zapped;
 static int poly_zapped;
 
+static struct tmp_sym *tsym; /* TODO: Localize this shit */
+                             /* (Or maybe put it in turnstate) */
+
+/* TODO: UNIFY ID-ON-USE SOMEHOW */
+/* TODO: USE DICE TO TRACK POTENCY OF NON-DAMAGE SPELLS */
+
 extern boolean notonhead;       /* for long worms */
 
 /* kludge to use mondied instead of killed */
 extern boolean m_using;
 
+static int spell_hit_mon(struct monst *, enum spell_source, enum spell_type,
+                         int);
+static int spell_to_zap_type(enum spell_type);
+static char* get_spell_flavor(enum spell_type);
 static void costly_cancel(struct obj *);
 static void polyuse(struct obj *, int, int);
 static void create_polymon(struct obj *, int);
@@ -53,6 +63,277 @@ static int spell_hit_bonus(int);
 #define is_hero_spell(type)     ((type) >= 10 && (type) < 20)
 
 static const char blinded_by_the_flash[] = "You are blinded by the flash!";
+
+enum spell_type otyp_to_spell(int otyp)
+{
+    switch (otyp) {
+    case WAN_CANCELLATION:
+    case SPE_CANCELLATION:
+        return spell_cancellation;
+    case SPE_CAUSE_FEAR:
+        return spell_cause_fear;
+    case SPE_CHARM_MONSTER:
+        return spell_charm_monster;
+    case SPE_CLAIRVOYANCE:
+        return spell_clairvoyance;
+    case SPE_CREATE_FAMILIAR:
+        return spell_create_familiar;
+    case SPE_CREATE_MONSTER:
+    case WAN_CREATE_MONSTER:
+        return spell_create_monster;
+    case SPE_CONE_OF_COLD:
+        return spell_cone_of_cold;
+    case SPE_CONFUSE_MONSTER:
+        return spell_confuse_monster;
+    case SPE_CURE_BLINDNESS:
+        return spell_cure_blindness;
+    case SPE_CURE_SICKNESS:
+        return spell_cure_sickness;
+    case SPE_DETECT_FOOD:
+        return spell_detect_food;
+    case SPE_DETECT_MONSTERS:
+        return spell_detect_monsters;
+    case SPE_DETECT_TREASURE:
+        return spell_detect_treasure;
+    case SPE_DETECT_UNSEEN:
+    case WAN_SECRET_DOOR_DETECTION:
+        return spell_detect_unseen;
+    case SPE_DIG:
+    case WAN_DIGGING:
+        return spell_dig;
+    case SPE_DRAIN_LIFE:
+        return spell_drain_life;
+    case SPE_EXTRA_HEALING:
+        return spell_extra_healing;
+    case SPE_FINGER_OF_DEATH:
+        return spell_finger_of_death;
+    case SPE_FIREBALL:
+        return spell_fireball;
+    case SPE_FORCE_BOLT:
+        return spell_force_bolt;
+    case SPE_HASTE_SELF:
+        return spell_haste_self;
+    case SPE_HEALING:
+        return spell_healing;
+    case SPE_IDENTIFY:
+        return spell_identify;
+    case SPE_INVISIBILITY:
+        return spell_invisibility;
+    case SPE_JUMPING:
+        return spell_jumping;
+    case SPE_KNOCK:
+    case WAN_OPENING:
+        return spell_knock;
+    case SPE_LEVITATION:
+        return spell_levitation;
+    case SPE_LIGHT:
+    case WAN_LIGHT:
+        return spell_light;
+    case SPE_MAGIC_MAPPING:
+        return spell_magic_mapping;
+    case SPE_MAGIC_MISSILE:
+    case WAN_MAGIC_MISSILE:
+        return spell_magic_missile;
+    case SPE_POLYMORPH:
+    case WAN_POLYMORPH:
+        return spell_polymorph;
+    case SPE_PROTECTION:
+        return spell_protection;
+    case SPE_RESTORE_ABILITY:
+        return spell_restore_ability;
+    case SPE_REMOVE_CURSE:
+        return spell_remove_curse;
+    case SPE_SLEEP:
+    case WAN_SLEEP:
+        return spell_sleep;
+    case SPE_SLOW_MONSTER:
+    case WAN_SLOW_MONSTER:
+        return spell_slow_monster;
+    case SPE_STONE_TO_FLESH:
+        return spell_stone_to_flesh;
+    case SPE_TELEPORT_AWAY:
+    case WAN_TELEPORTATION:
+        return spell_teleport_away;
+    case SPE_TURN_UNDEAD:
+    case WAN_UNDEAD_TURNING:
+        return spell_turn_undead;
+    case SPE_WIZARD_LOCK:
+    case WAN_LOCKING:
+        return spell_wizard_lock;
+    case WAN_ENLIGHTENMENT:
+        return spell_enlightenment;
+    case WAN_WISHING:
+        return spell_wishing;
+    case WAN_STRIKING:
+        return spell_striking;
+    case WAN_MAKE_INVISIBLE:
+        return spell_make_invisible;
+    case WAN_SPEED_MONSTER:
+        return spell_speed_monster;
+    case WAN_PROBING:
+        return spell_probing;
+    case WAN_FIRE:
+        return spell_fire_bolt;
+    case WAN_COLD:
+        return spell_cold_bolt;
+    case WAN_DEATH:
+        return spell_death;
+    case WAN_LIGHTNING:
+        return spell_lightning_bolt;
+    default:
+        return spell_no_spell;
+    }
+    return spell_no_spell;
+}
+
+int get_spell_range(enum spell_type spell, boolean tracer)
+{
+    switch (spell) {
+    case spell_missile_breath:
+    case spell_fire_breath:
+    case spell_cold_breath:
+    case spell_sleep_breath:
+    case spell_disintegration_breath:
+    case spell_lightning_breath:
+    case spell_poison_breath:
+    case spell_acid_breath:
+    case spell_cone_of_cold:
+    case spell_dig:
+    case spell_finger_of_death:
+    case spell_fireball:
+    case spell_magic_missile:
+    case spell_sleep:
+    case spell_fire_bolt:
+    case spell_cold_bolt:
+    case spell_death:
+    case spell_lightning_bolt:
+        if (tracer)
+            return 13;
+        else
+            return rn1(7,7);
+        break;
+
+    case spell_cancellation:
+    case spell_drain_life:
+    case spell_extra_healing:
+    case spell_force_bolt:
+    case spell_healing:
+    case spell_knock:
+    case spell_polymorph:
+    case spell_slow_monster:
+    case spell_stone_to_flesh:
+    case spell_teleport_away:
+    case spell_turn_undead:
+    case spell_wizard_lock:
+    case spell_striking:
+    case spell_make_invisible:
+    case spell_speed_monster:
+    case spell_probing:
+        if (tracer)
+            return 13;
+        else
+            return rn1(8,6);
+        break;
+    case spell_psi_bolt:
+    case spell_stun:
+    case spell_drain_strength:
+    case spell_destroy_armor:
+    case spell_curse_items:
+    case spell_aggravate:
+    case spell_summon_nasties:
+    case spell_touch_of_death:
+    case spell_open_wounds:
+    case spell_confuse:
+    case spell_paralyze:
+    case spell_blind:
+    case spell_lightning:
+    case spell_fire_pillar:
+    case spell_geyser:
+        return 1;
+        break;
+    default:
+        return 0;
+        break;
+    }
+    return 0;
+}
+
+static int spell_to_zap_type(enum spell_type spell)
+{
+    switch (spell) {
+    case spell_magic_missile:
+    case spell_missile_breath:
+        return ZT_MAGIC_MISSILE;
+    case spell_fire_bolt:
+    case spell_fireball:
+    case spell_fire_breath:
+        return ZT_FIRE;
+    case spell_cold_bolt:
+    case spell_cone_of_cold:
+    case spell_cold_breath:
+        return ZT_COLD;
+    case spell_death:
+    case spell_finger_of_death:
+    case spell_disintegration_breath:
+        return ZT_DEATH; /* FIXME: Disintegration should be its own type. */
+    case spell_lightning_bolt:
+    case spell_lightning_breath:
+        return ZT_LIGHTNING;
+    case spell_sleep:
+    case spell_sleep_breath:
+        return ZT_SLEEP;
+    case spell_poison_breath:
+        return ZT_POISON_GAS;
+    case spell_acid_breath:
+        return ZT_ACID;
+    default:
+        return -1;
+    }
+}
+
+static char* get_spell_flavor(enum spell_type spell)
+{
+    switch (spell) {
+    case spell_magic_missile:
+        return "magic missile";
+    case spell_fire_bolt:
+        return "bolt of fire";
+    case spell_cold_bolt:
+        return "bolt of cold";
+    case spell_death:
+        return "death ray";
+    case spell_lightning_bolt:
+        return "bolt of lightning";
+    case spell_sleep:
+        return "sleep ray";
+    case spell_fireball:
+        return "fireball";
+    case spell_cone_of_cold:
+        return "cone of cold";
+    case spell_finger_of_death:
+        return "finger of death";
+    case spell_missile_breath:
+        return "blast of missiles";
+    /*case spell_light_breath:
+        return "blast of light";*/ /* Deferred feature. */
+    case spell_fire_breath:
+        return "blast of fire";
+    case spell_cold_breath:
+        return "blast of frost";
+    case spell_sleep_breath:
+        return "blast of sleep gas";
+    case spell_disintegration_breath:
+        return "blast of disintegration";
+    case spell_lightning_breath:
+        return "blast of lightning";
+    case spell_poison_breath:
+        return "blast of poison gas";
+    case spell_acid_breath:
+        return "blast of acid";
+    default:
+        return NULL;
+    }
+}
 
 const char *const flash_types[] = {     /* also used in buzzmu(mcastu.c) */
     "magic missile",    /* Wands must be 0-9 */
@@ -88,6 +369,436 @@ const char *const flash_types[] = {     /* also used in buzzmu(mcastu.c) */
     "",
     ""
 };
+
+const char *const ray_text[] = {
+    "magic missile",    /* Wands must be 0-9 */
+    "bolt of fire",
+    "bolt of cold",
+    "sleep ray",
+    "death ray",
+    "bolt of lightning",
+    "fireball",
+    "cone of cold",
+    "finger of death",
+    "blast of missiles",        /* Dragon breath equivalents 20-29 */
+    "blast of fire",
+    "blast of frost",
+    "blast of sleep gas",
+    "blast of disintegration",
+    "blast of lightning",
+    "blast of poison gas",
+    "blast of acid"
+};
+
+/* Hit the monster with a spell.  Merges old bhitm and zap_hit_mons into
+   something more unified. Returns damage sustained by the monster.
+   TODO: Handle tracers specially, to see if the monster is vulnerable?
+   XXX: Spell damage and resistance difficulty are overloaded in num_dice.
+   This is ugly, but no existing spell needs both.
+   XXX: The spell_source is for ID purposes, use it
+   XXX: Handle broken wands. */
+
+int
+spell_hit_mon(struct monst *mtmp, enum spell_source origin,
+              enum spell_type spell, int num_dice)
+{
+    boolean wake = TRUE;        /* Some 'zaps' should wake monster */
+    boolean reveal_invis = FALSE;
+    boolean sho_shieldeff = FALSE;
+    int dmg;
+    int tmp; /* XXX: There really shouldn't be both dmg and tmp */
+    const char *zap_type_text = "spell";
+    struct obj *obj;
+    boolean disguised_mimic = (mtmp->data->mlet == S_MIMIC &&
+                               mtmp->m_ap_type != M_AP_NOTHING);
+    boolean spellcaster = (origin == source_player_spell);
+
+    switch (spell) {
+    case spell_cancellation:
+        cancel_monst(mtmp, num_dice, TRUE, TRUE, FALSE);
+        break;
+
+    case spell_cone_of_cold:
+    case spell_cold_bolt:
+    case spell_cold_breath:
+        if (resists_cold(mtmp)) {
+            sho_shieldeff = TRUE;
+            break;
+        }
+        tmp = dice(num_dice, 6);
+        if (resists_fire(mtmp))
+            tmp += dice(num_dice, 3);
+        if (spellcaster)
+            tmp += spell_damage_bonus();
+        if (!rn2(3))
+            destroy_mitem(mtmp, POTION_CLASS, AD_COLD);
+        break;
+
+    case spell_drain_life:
+        dmg = rnd(8);
+        /* TODO: Make dbldam work somehow */
+        //if (dbldam)
+        //    dmg *= 2;
+        dmg += spell_damage_bonus();
+        if (resists_drli(mtmp))
+            shieldeff(mtmp->mx, mtmp->my);
+        else if (!resist_power(mtmp, num_dice, dmg, NOTELL) && mtmp->mhp > 0) {
+            mtmp->mhp -= dmg;
+            mtmp->mhpmax -= dmg;
+            if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < 1)
+                xkilled(mtmp, 1);
+            else {
+                mtmp->m_lev--;
+                if (canseemon(mtmp))
+                    pline("%s suddenly seems weaker!", Monnam(mtmp));
+            }
+        }
+        break;
+
+    case spell_healing:
+    case spell_extra_healing:
+        reveal_invis = TRUE;
+        if (mtmp->data != &mons[PM_PESTILENCE]) {
+            wake = FALSE;       /* wakeup() makes the target angry */
+            mtmp->mhp += dice(num_dice, spell == spell_extra_healing ? 8 : 4);
+            if (mtmp->mhp > mtmp->mhpmax)
+                mtmp->mhp = mtmp->mhpmax;
+            if (mtmp->mblinded) {
+                mtmp->mblinded = 0;
+                mtmp->mcansee = 1;
+            }
+            if (canseemon(mtmp)) {
+                if (disguised_mimic) {
+                    if (mtmp->m_ap_type == M_AP_OBJECT &&
+                        mtmp->mappearance == STRANGE_OBJECT) {
+                        /* it can do better now */
+                        set_mimic_sym(mtmp, level);
+                        newsym(mtmp->mx, mtmp->my);
+                    } else
+                        mimic_hit_msg(mtmp, spell);
+                } else
+                    pline("%s looks%s better.", Monnam(mtmp),
+                          spell == spell_extra_healing ? " much" : "");
+            }
+            if (mtmp->mtame || mtmp->mpeaceful) {
+                adjalign(Role_if(PM_HEALER) ? 1 : sgn(u.ualign.type));
+            }
+        } else {        /* Pestilence */
+            /* Pestilence will always resist; damage is half of 3d{4,8} */
+            /* This seems dumb to me. -dtsund */
+            resist_power(mtmp, num_dice,
+                   dice(3, spell == spell_extra_healing ? 8 : 4), TELL);
+        }
+        break;
+
+    case spell_finger_of_death:
+    case spell_death:
+        if (mtmp->data == &mons[PM_DEATH]) {
+            mtmp->mhpmax += mtmp->mhpmax / 2;
+            if (mtmp->mhpmax >= MAGIC_COOKIE)
+                mtmp->mhpmax = MAGIC_COOKIE - 1;
+            mtmp->mhp = mtmp->mhpmax;
+            tmp = 0;
+            break;
+        }
+        if (nonliving(mtmp->data) || is_demon(mtmp->data) ||
+            resists_magm(mtmp)) { /* similar to player */
+            sho_shieldeff = TRUE;
+            break;
+        }
+        tmp = mtmp->mhp + 1;
+        break;
+
+    case spell_fireball:
+        /* XXX: ??? */
+
+    case spell_force_bolt:
+    case spell_striking:
+        reveal_invis = TRUE;
+        if (resists_magm(mtmp)) {
+            shieldeff(mtmp->mx, mtmp->my);
+            break;      /* skip makeknown */
+        } else if (Engulfed || rnd(20) < 10 + find_mac(mtmp)) {
+            dmg = dice(num_dice, 12);
+            if (spell == spell_force_bolt && origin == source_player_spell)
+                dmg += spell_damage_bonus();
+            hit(spell == spell_striking ? "wand" : "spell", mtmp,
+                exclam(dmg));
+            resist_power(mtmp, num_dice, dmg, TELL);
+        } else
+            miss(zap_type_text, mtmp);
+        
+        if (spell == spell_striking)
+            makeknown(WAN_STRIKING);
+        break;
+
+    case spell_knock:
+        wake = FALSE;   /* don't want immediate counterattack */
+        if (Engulfed && mtmp == u.ustuck) {
+            if (is_animal(mtmp->data)) {
+                if (Blind)
+                    pline("You feel a sudden rush of air!");
+                else
+                    pline("%s opens its mouth!", Monnam(mtmp));
+            }
+            expels(mtmp, mtmp->data, TRUE);
+        } else if (! !(obj = which_armor(mtmp, os_saddle))) {
+            mtmp->misc_worn_check &= ~obj->owornmask;
+            update_mon_intrinsics(mtmp, obj, FALSE, FALSE);
+            obj->owornmask = 0L;
+            obj_extract_self(obj);
+            place_object(obj, level, mtmp->mx, mtmp->my);
+            /* call stackobj() if we ever drop anything that can merge */
+            newsym(mtmp->mx, mtmp->my);
+        }
+        break;
+
+    case spell_magic_missile:
+    case spell_missile_breath:
+        if (resists_magm(mtmp)) {
+            sho_shieldeff = TRUE;
+            break;
+        }
+        tmp = dice(num_dice, 6);
+        if (spellcaster)
+            tmp += spell_damage_bonus();
+        break;
+
+    case spell_polymorph:
+        poly_mons(mtmp, num_dice, (origin == source_player_spell 
+                                   || origin == source_monster_spell)
+                                  ? SPE_POLYMORPH : WAN_POLYMORPH);
+        break;
+
+    case spell_sleep:
+    case spell_sleep_breath:
+        tmp = 0;
+        sleep_monst(mtmp, dice(num_dice, 25),
+                    (origin == source_player_wand ||
+                     origin == source_monster_wand)
+                    ? WAND_CLASS : '\0');
+        break;
+
+    case spell_slow_monster:
+        if (!resist_power(mtmp, num_dice, 0, NOTELL)) {
+            mon_adjust_speed(mtmp, -1, NULL); /* XXX: THIS WON'T IDENTIFY WAND
+                                                 OF SLOWING ANYMORE */
+            m_dowear(mtmp, FALSE);      /* might want speed boots */
+            if (Engulfed && (mtmp == u.ustuck) && is_whirly(mtmp->data)) {
+                pline("You disrupt %s!", mon_nam(mtmp));
+                pline("A huge hole opens up...");
+                expels(mtmp, mtmp->data, TRUE);
+            }
+        }
+        break;
+
+    case spell_stone_to_flesh:
+        if (monsndx(mtmp->data) == PM_STONE_GOLEM) {
+            const char *name = Monnam(mtmp);
+
+            /* turn into flesh golem */
+            if (newcham(mtmp, &mons[PM_FLESH_GOLEM], FALSE, FALSE)) {
+                if (canseemon(mtmp))
+                    pline("%s turns to flesh!", name);
+            } else {
+                if (canseemon(mtmp))
+                    pline("%s looks rather fleshy for a moment.", name);
+            }
+        } else
+            wake = FALSE;
+        break;
+
+    case spell_teleport_away:
+        reveal_invis = !u_teleport_mon(mtmp, TRUE);
+        break;
+
+
+    case spell_turn_undead:
+        wake = FALSE;
+        if (unturn_dead(mtmp))
+            wake = TRUE;
+        if (is_undead(mtmp->data)) {
+            reveal_invis = TRUE;
+            wake = TRUE;
+            dmg = rnd(8);
+            /* TODO: Make dbldam work somehow */
+            //if (dbldam)
+            //    dmg *= 2;
+            if (origin == source_player_spell)
+                dmg += spell_damage_bonus();
+            flags.bypasses = TRUE;      /* for make_corpse() */
+            if (!resist_power(mtmp, num_dice, dmg, NOTELL)) {
+                if (mtmp->mhp > 0)
+                    monflee(mtmp, 0, FALSE, TRUE);
+            }
+        }
+        break;
+
+    case spell_make_invisible:
+        {
+            int oldinvis = mtmp->minvis;
+            /* format monster's name before altering its visibility */
+            const char *nambuf = Monnam(mtmp);
+
+            mon_set_minvis(mtmp);
+            if (!oldinvis && knowninvisible(mtmp)) {
+                pline("%s turns transparent!", nambuf);
+                makeknown(WAN_MAKE_INVISIBLE);
+            }
+            break;
+        }
+
+    case spell_speed_monster:
+        if (!resist_power(mtmp, num_dice, 0, NOTELL)) {
+            mon_adjust_speed(mtmp, 1, NULL); /*XXX: IDENTITY YADDA YADDA YADDA*/
+            m_dowear(mtmp, FALSE);      /* might want speed boots */
+        }
+        break;
+
+    case spell_probing:
+        wake = FALSE;
+        reveal_invis = TRUE;
+        probe_monster(mtmp);
+        makeknown(WAN_PROBING);
+        break;
+
+    case spell_fire_bolt:
+    case spell_fire_breath:
+        if (resists_fire(mtmp)) {
+            sho_shieldeff = TRUE;
+            break;
+        }
+        tmp = dice(num_dice, 6);
+        if (resists_cold(mtmp))
+            tmp += 7;
+        if (spellcaster)
+            tmp += spell_damage_bonus();
+
+        if (burnarmor(mtmp)) {
+            if (!rn2(3))
+                destroy_mitem(mtmp, POTION_CLASS, AD_FIRE);
+            if (!rn2(3))
+                destroy_mitem(mtmp, SCROLL_CLASS, AD_FIRE);
+            if (!rn2(5))
+                destroy_mitem(mtmp, SPBOOK_CLASS, AD_FIRE);
+        }
+        break;
+
+    case spell_lightning_bolt:
+    case spell_lightning_breath:
+        if (resists_elec(mtmp)) {
+            sho_shieldeff = TRUE;
+            tmp = 0;
+            /* can still blind the monster */
+        } else
+            tmp = dice(num_dice, 6);
+        if (spellcaster)
+            tmp += spell_damage_bonus();
+
+        if (!resists_blnd(mtmp) && !(origin >= source_first_player &&
+                                     origin <= source_last_player &&
+                                     Engulfed && mtmp == u.ustuck)) {
+            unsigned rnd_tmp = rnd(50);
+
+            mtmp->mcansee = 0;
+            if ((mtmp->mblinded + rnd_tmp) > 127)
+                mtmp->mblinded = 127;
+            else
+                mtmp->mblinded += rnd_tmp;
+        }
+        if (!rn2(3))
+            destroy_mitem(mtmp, WAND_CLASS, AD_ELEC);
+        /* not actually possible yet */
+        if (!rn2(3))
+            destroy_mitem(mtmp, RING_CLASS, AD_ELEC);
+        break;
+
+    case spell_psi_bolt:
+    case spell_stun:
+    case spell_drain_strength:
+    case spell_destroy_armor:
+    case spell_curse_items:
+    case spell_aggravate:
+    case spell_touch_of_death:
+    case spell_open_wounds:
+    case spell_confuse:
+    case spell_paralyze:
+    case spell_blind:
+    case spell_lightning:
+    case spell_fire_pillar:
+    case spell_geyser:
+        break; /* TODO: Put monster spell effects here */
+
+    case spell_disintegration_breath:;
+        /* XXX: Extravagantly broken.  Also, move AoLS stuff here. */
+#if 0
+        struct obj *otmp2;
+        int dummy;
+        if (mtmp->misc_worn_check & W_MASK(os_arms)) {
+            /* destroy shield; victim survives */
+            *ootmp = which_armor(mtmp, os_arms);
+        } else if (mtmp->misc_worn_check & W_MASK(os_arm)) {
+            /* destroy body armor, also cloak if present */
+            *ootmp = which_armor(mtmp, os_arm);
+            if ((otmp2 = which_armor(mtmp, os_armc)) &&
+                !item_provides_extrinsic(otmp2, DISINT_RES, &dummy))
+                m_useup(mtmp, otmp2);
+        } else {
+            if ((otmp2 = which_armor(mtmp, os_armc)) &&
+                !item_provides_extrinsic(otmp2, DISINT_RES, &dummy))
+                m_useup(mtmp, otmp2);
+            if ((otmp2 = which_armor(mtmp, os_armu)) &&
+                !item_provides_extrinsic(otmp2, DISINT_RES, &dummy))
+                m_useup(mtmp, otmp2);
+
+            if (resists_disint(mtmp))
+                sho_shieldeff = TRUE;
+            else
+                tmp = MAGIC_COOKIE;
+        }
+#endif
+    break;
+
+    case spell_poison_breath:
+        if (resists_poison(mtmp)) {
+            sho_shieldeff = TRUE;
+            break;
+        }
+        tmp = dice(num_dice, 6);
+        break;
+
+    case spell_acid_breath:
+        if (resists_acid(mtmp)) {
+            sho_shieldeff = TRUE;
+            break;
+        }
+        tmp = dice(num_dice, 6);
+        if (!rn2(6))
+            acid_damage(MON_WEP(mtmp));
+        if (!rn2(6))
+            hurtarmor(mtmp, ERODE_CORRODE);
+        break;
+
+    default:
+        /* The other spells shouldn't have on-hit effects */
+        wake = FALSE;
+        break;
+    }
+    /* Do something with the below. */
+    if (sho_shieldeff)
+        shieldeff(mtmp->mx, mtmp->my);
+    if (origin >= source_first_player && origin <= source_last_player
+        && (Role_if(PM_KNIGHT) && Uhave_questart))
+        tmp *= 2;
+    if (tmp > 0 && origin >= source_first_player && origin <= source_last_player
+        && resist(mtmp, origin == source_player_wand ? WAND_CLASS : '\0', 0,
+                  NOTELL))
+        tmp /= 2;
+    if (tmp < 0)
+        tmp = 0;        /* don't allow negative damage */
+    mtmp->mhp -= tmp;
+    return tmp;
+}
 
 /* Routines for IMMEDIATE wands and spells. */
 /* bhitm: monster mtmp was hit by the effect of wand or spell otmp */
@@ -195,7 +906,7 @@ bhitm(struct monst *mtmp, struct obj *otmp)
         break;
     case WAN_CANCELLATION:
     case SPE_CANCELLATION:
-        cancel_monst(mtmp, otmp, TRUE, TRUE, FALSE);
+        cancel_monst(mtmp, oclass_power(otmp->oclass), TRUE, TRUE, FALSE);
         break;
     case WAN_TELEPORTATION:
     case SPE_TELEPORT_AWAY:
@@ -2040,7 +2751,7 @@ zapyourself(struct obj *obj, boolean ordinary)
 
     case WAN_CANCELLATION:
     case SPE_CANCELLATION:
-        cancel_monst(&youmonst, obj, TRUE, FALSE, TRUE);
+        cancel_monst(&youmonst, oclass_power(obj->oclass), TRUE, FALSE, TRUE);
         break;
 
     case SPE_DRAIN_LIFE:
@@ -2288,7 +2999,7 @@ zap_steed(struct obj *obj)
  * themselves with cancellation.
  */
 boolean
-cancel_monst(struct monst * mdef, struct obj * obj, boolean youattack,
+cancel_monst(struct monst * mdef, int power, boolean youattack,
              boolean allow_cancel_kill, boolean self_cancel)
 {
     boolean youdefend = (mdef == &youmonst);
@@ -2297,7 +3008,7 @@ cancel_monst(struct monst * mdef, struct obj * obj, boolean youattack,
     static const char your[] = "your";  /* should be extern */
 
     if (youdefend ? (!youattack && Antimagic)
-        : resist(mdef, obj->oclass, 0, NOTELL))
+        : resist_power(mdef, power, 0, NOTELL))
         return FALSE;   /* resisted cancellation */
 
     if (self_cancel) {  /* 1st cancel inventory */
@@ -2530,16 +3241,29 @@ weffects(struct obj *obj, schar dx, schar dy, schar dz)
     } else {
         /* neither immediate nor directionless */
 
-        if (otyp == WAN_DIGGING || otyp == SPE_DIG)
-            zap_dig(dx, dy, dz);
-        else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_FINGER_OF_DEATH)
-            buzz(otyp - SPE_MAGIC_MISSILE + 10, u.ulevel / 2 + 1, u.ux, u.uy,
-                 dx, dy);
-        else if (otyp >= WAN_MAGIC_MISSILE && otyp <= WAN_LIGHTNING)
-            buzz(otyp - WAN_MAGIC_MISSILE, (otyp == WAN_MAGIC_MISSILE) ? 2 : 6,
-                 u.ux, u.uy, dx, dy);
+        //if (otyp == WAN_DIGGING || otyp == SPE_DIG)
+        //    zap_dig(dx, dy, dz);
+        //else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_FINGER_OF_DEATH)
+        //    buzz(otyp - SPE_MAGIC_MISSILE + 10, u.ulevel / 2 + 1, u.ux, u.uy,
+        //         dx, dy);
+        //else if (otyp >= WAN_MAGIC_MISSILE && otyp <= WAN_LIGHTNING)
+        //    buzz(otyp - WAN_MAGIC_MISSILE, (otyp == WAN_MAGIC_MISSILE) ? 2 : 6,
+        //         u.ux, u.uy, dx, dy);
+        enum spell_type spell = otyp_to_spell(otyp);
+        int spell_range = get_spell_range(spell, FALSE);
+        enum spell_source origin = (obj->oclass == SPBOOK_CLASS ?
+                                    source_player_spell : source_player_wand);
+        int dice = 0;
+        if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_FINGER_OF_DEATH)
+            dice = u.ulevel / 2 + 1;
+        else
+            dice = (otyp == WAN_MAGIC_MISSILE) ? 2 : 6;
+
+        if (spell != spell_no_spell)
+            buzz(spell, origin, u.ux, u.uy, dx, dy, dz, dice, spell_range, FALSE);
         else
             impossible("weffects: unexpected spell or wand");
+
         disclose = TRUE;
     }
     if (disclose && was_unkn) {
@@ -2961,6 +3685,7 @@ boomhit(int dx, int dy)
 }
 
 /* returns damage to mon */
+#if 0
 static int
 zap_hit_mon(struct monst *mon, int type, int nd, struct obj **ootmp)
 {       /* to return worn armor for caller to disintegrate */
@@ -3121,6 +3846,7 @@ zap_hit_mon(struct monst *mon, int type, int nd, struct obj **ootmp)
     mon->mhp -= tmp;
     return tmp;
 }
+#endif
 
 static void
 zap_hit_u(int type, int nd, const char *fltxt, xchar sx, xchar sy)
@@ -3334,6 +4060,352 @@ zap_hit_check(int ac, int type)
     return (3 - chance) < ac + spell_bonus;
 }
 
+static boolean
+spell_bounces(enum spell_type spell)
+{
+    switch (spell) {
+    case spell_finger_of_death:
+    case spell_magic_missile:
+    case spell_sleep:
+    case spell_fire_bolt:
+    case spell_cold_bolt:
+    case spell_death:
+    case spell_lightning_bolt:
+    case spell_missile_breath:
+    case spell_fire_breath:
+    case spell_cold_breath:
+    case spell_sleep_breath:
+    case spell_disintegration_breath:
+    case spell_lightning_breath:
+    case spell_poison_breath:
+    case spell_acid_breath:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
+/*
+ * Buzz a given square with the given spell.  Reduce range by 1.  If range is
+ * still positive, buzz the given square + (dx, dy) with the same spell
+ * recursively.
+ * If the spell is marked as a tracer, check whether it's possible to knowingly
+ * harm yourself or a pet.  If a tracer reaches a reflective enemy, recurse in
+ * both directions to make sure the beam is safe whether it hits or misses.
+ * TODO: Perhaps let buzz take arguments related to telling the player exactly
+ * what the tracer hits.
+ * Return value is true if it's a tracer and it's warning you about friendly
+ * fire, false otherwise.
+ * TODO: Audit this to make tracers have no effect and print no messages.
+ * TODO: Make tmpsym work.
+ * TODO: Make explosions work.
+ * TODO: Audit this to make sure we never print flavor when it's null.
+ * TODO: Actually, make everything pass dice into this based on caster and
+ * spell.  Maybe?  Probably not.
+ * TODO: Shop damage.
+ */
+boolean
+buzz(enum spell_type spell, enum spell_source origin, xchar cur_x, xchar cur_y,
+     int dx, int dy, int dz, int num_dice, short range, boolean tracer)
+{
+    struct rm *loc;
+    boolean bounce = FALSE;
+    boolean in_bounds = TRUE;
+    boolean shop_damage = FALSE;
+
+    /* What's the beam's flavor text, etc.? */
+    /* flavor might be NULL; this means "don't print a flavor message". */
+    const char *flavor = get_spell_flavor(spell);
+    const int beam_type = spell_to_zap_type(spell);
+
+    /* First things first: handle the case where we're engulfed. */
+    if (Engulfed) {
+        int tmp;
+
+        /* TODO: Actually make this work with spell_type */
+        /* Perhaps zap_hit_mon should take spell_type instead of beam_type */
+
+        tmp = spell_hit_mon(u.ustuck, origin, spell, num_dice);
+        if (!u.ustuck)
+            Engulfed = 0;
+        else if (flavor != NULL)
+            pline("%s rips into %s%s", The(flavor), mon_nam(u.ustuck),
+                  exclam(tmp));
+
+        /* Using disintegration from the inside only makes a hole... */
+        if (tmp == MAGIC_COOKIE)
+            u.ustuck->mhp = 0;
+        if (u.ustuck->mhp < 1)
+            killed(u.ustuck);
+        return FALSE;
+    }
+
+    /* Are we in-bounds? */
+    if (!isok(cur_x, cur_y)) {
+        in_bounds = FALSE;
+        if (spell_bounces(spell))
+            bounce = TRUE;
+        else
+            return FALSE;
+    }
+
+    /* Scribble on the map screen, if the spell has a visible ray. */
+    /* TODO: Don't special-case digging rays. */
+    if (in_bounds && (beam_type > -1 || spell == spell_dig))
+    {
+        if (tsym == NULL){
+            if (spell == spell_dig) {
+                tsym = tmpsym_init(DISP_BEAM, dbuf_effect(E_MISC, E_digbeam));
+            } else {
+                tsym = tmpsym_init(DISP_BEAM,
+                                   zapdir_to_effect(dx, dy, beam_type));
+            }
+            tmpsym_at(tsym, cur_x, cur_y);
+            win_delay_output();     /* wait a little bit */
+        }
+    }
+
+    /* Affect the things currently on the square. */
+    /* Affect terrain and items.  We do this first so we know to skip monsters
+       if this is a wall. */
+    if (in_bounds) {
+        if (spell == spell_dig) {
+            range += zap_dig(cur_x, cur_y, dz, &shop_damage);
+        } 
+        /*else if ((loc = &level->locations[cur_x][cur_y])->typ)*/
+        /* TODO: Walls */
+        range += zap_over_floor(cur_x, cur_y, beam_type, &shop_damage);
+    }
+
+    struct monst *mon = NULL;
+    /* Affect monsters/players. */
+    /* Probably explode here if we're going to? */
+    if(in_bounds && !bounce && ((cur_x == u.ux && cur_y == u.uy) ||
+                                (mon = m_at(level, cur_x, cur_y)) != NULL)) {
+        if (cur_x == u.ux && cur_y == u.uy) {
+            /* We're buzzing the player. */
+            action_interrupted();
+            if (u.usteed && !rn2(3) && !mon_reflects(u.usteed, NULL)) {
+                mon = u.usteed;
+            } else if (zap_hit_check((int)get_player_ac(), 0)) {
+                /* TODO: Don't assume the spell checks AC. */
+                range -= 2;
+                if (flavor != NULL)
+                    pline("%s hits you!", The(flavor));
+                /* TODO: Add a spell_reflectable function instead of just
+                   checking whether it has flavor (which I think matches, but
+                   is horrible).
+                   TODO: Don't assume a reflectable spell prints text here.
+                   Basically, this is all kinds of messed up and needs fixed. */
+                if (Reflecting && flavor != NULL) {
+                    if (!Blind) {
+                        ureflects("But %s reflects from your %s!", "it");
+                    } else
+                        pline("For some reason you are not affected.");
+                    dx = -dx;
+                    dy = -dy;
+                    shieldeff(cur_x, cur_y);
+                } else {
+                    /* TODO: Let this handle all spells. */
+                    zap_hit_u(beam_type, num_dice, flavor, cur_x, cur_y);
+                }
+            } else {
+                if (flavor != NULL)
+                    pline("%s whizzes by you!", The(flavor));
+            }
+            if (beam_type == ZT_LIGHTNING && !resists_blnd(&youmonst)) {
+                pline(blinded_by_the_flash);
+                make_blinded((long)dice(num_dice, 50), FALSE);
+                if (!Blind)
+                    pline("Your vision quickly clears.");
+            }
+            /* XXX: Do we really need a second interruption? */
+            action_interrupted();
+        }
+
+        if (mon != NULL) {
+            /* We're buzzing a monster. */
+            if (origin >= source_first_player && origin <= source_last_player) {
+                mon->mstrategy &= ~STRAT_WAITMASK;
+                /* TODO: Something something spell_reflectable */
+                if (mon_reflects(mon, NULL)) {
+                    if (cansee(mon->mx, mon->my)) {
+                        hit(flavor, mon, exclam(0));
+                        shieldeff(mon->mx, mon->my);
+                        mon_reflects(mon, "But it reflects from %s %s!");
+                    }
+                    dx = -dx;
+                    dy = -dy;
+                } else {
+                    boolean mon_could_move = mon->mcanmove;
+                    /* Again, make this general to all spells that can hit. */
+                    int tmp = spell_hit_mon(mon, origin, spell, num_dice);
+                    /* TODO: Put the below mess in the beam hit code, where it belongs. */
+#if 0
+                    if (is_rider(mon->data) &&
+                        spell == spell_disintegration_breath) {
+                        /* TODO: Give disintegration its own ray type, instead
+                           of hardcoding this to that one spell. */
+                        if (canseemon(mon)) {
+                            hit(flavor, mon, ".");
+                            pline("%s disintegrates.", Monnam(mon));
+                            pline("%s body reintegrates before your %s!",
+                                  s_suffix(Monnam(mon)),
+                                  (eyecount(youmonst.data) ==
+                                   1) ? body_part(EYE) :
+                                  makeplural(body_part(EYE)));
+                            pline("%s resurrects!", Monnam(mon));
+                        }
+                        mon->mhp = mon->mhpmax;
+                        /* TODO: Stop the beam here.  Preferably without goto. */
+                        range = 0;
+                    }
+                    if (mon->data == &mons[PM_DEATH] && beam_type == ZT_DEATH) {
+                        if (canseemon(mon)) {
+                            hit(flavor, mon, ".");
+                            /* Used to check for breath to possibly print blast
+                               instead of ray, but there are no death blasts
+                               and anyway what would be a death blast gets
+                               taken care of above in the disintegration case.
+                               If this confuses you, it's because you're not
+                               insane.*/
+                            pline("%s absorbs the deadly %s!", Monnam(mon),
+                                  "ray");
+                            pline("It seems even stronger than before.");
+                        }
+                        /* TODO: Stop the beam here.  Preferably without goto. */
+                        range = 0;
+                    }
+                    
+                    /* Everything below is related to making monsters survive
+                       via an amulet of life saving.  I have to believe there's
+                       a cleaner way to do this. */
+                    if (tmp == MAGIC_COOKIE) {  /* disintegration */
+                        struct obj *otmp2, *m_amulet = mlifesaver(mon);
+
+                        if (canseemon(mon)) {
+                            if (!m_amulet)
+                                pline("%s is disintegrated!", Monnam(mon));
+                            else
+                                hit(flavor, mon, "!");
+                        }
+
+/* note: worn amulet of life saving must be preserved in order to operate */
+#define oresist_disintegration(obj) \
+            (objects[obj->otyp].oc_oprop == DISINT_RES || \
+             obj_resists(obj, 5, 50) || is_quest_artifact(obj) || \
+             obj == m_amulet)
+
+                        for (otmp = mon->minvent; otmp; otmp = otmp2) {
+                            otmp2 = otmp->nobj;
+                            if (!oresist_disintegration(otmp)) {
+                                /* update the monsters intrinsics and saddle in
+                                   case it is lifesaved. */
+                                if (otmp->owornmask && otmp->otyp == SADDLE)
+                                    mon->misc_worn_check &= ~W_MASK(os_saddle);
+                                update_mon_intrinsics(mon, otmp, FALSE, TRUE);
+                                obj_extract_self(otmp);
+                                obfree(otmp, NULL);
+                            }
+                        }
+
+                        if (type < 0)
+                            monkilled(mon, NULL, -AD_RBRE);
+                        else
+                            xkilled(mon, 2);
+                    } else if (mon->mhp < 1) {
+                        if (type < 0)
+                            monkilled(mon, flavor, AD_RBRE);
+                        else
+                            killed(mon);
+                    } else {
+                        if (!otmp) {
+                            /* normal non-fatal hit */
+                            hit(flavor, mon, exclam(tmp));
+                        } else {
+                            int dummy;
+                            /* some armor was destroyed; no damage done */
+                            if (canseemon(mon))
+                                pline("%s %s is disintegrated!",
+                                      s_suffix(Monnam(mon)),
+                                      distant_name(otmp, xname));
+                            if (!item_provides_extrinsic(otmp, DISINT_RES,
+                                                         &dummy))
+                                m_useup(mon, otmp);
+                        }
+                        if (mon_could_move && !mon->mcanmove)   /* ZT_SLEEP */
+                            slept_monst(mon);
+                    }
+#endif
+                }
+                range -= 2;
+            } else {
+                miss(flavor, mon);
+            }
+        }
+
+    }
+
+
+    /* Now propagate the beam, if necessary. */
+    /* Do we need to bounce? */
+    /* TODO: Make this, uh, work. */
+#if 0
+    if (bounce)
+    {
+        if (type == ZT_SPELL(ZT_FIRE)) {
+            sx = lsx;
+            sy = lsy;
+            break;  /* fireballs explode before the wall */
+        }
+        bounce = 0;
+        range--;
+        if (range && isok(lsx, lsy) && cansee(lsx, lsy))
+            pline("%s bounces!", The(flavor));
+        if (!dx || !dy || !rn2(20)) {
+            dx = -dx;
+            dy = -dy;
+        } else {
+            if (isok(sx, lsy) &&
+                ZAP_POS(rmn = level->locations[sx][lsy].typ) &&
+                !closed_door(level, sx, lsy) &&
+                (IS_ROOM(rmn) ||
+                 (isok(sx + dx, lsy) &&
+                  ZAP_POS(level->locations[sx + dx][lsy].typ))))
+                bounce = 1;
+            if (isok(lsx, sy) &&
+                ZAP_POS(rmn = level->locations[lsx][sy].typ) &&
+                !closed_door(level, lsx, sy) &&
+                (IS_ROOM(rmn) ||
+                 (isok(lsx, sy + dy) &&
+                  ZAP_POS(level->locations[lsx][sy + dy].typ))))
+                if (!bounce || rn2(2))
+                    bounce = 2;
+
+            switch (bounce) {
+            case 0:
+                dx = -dx;   /* fall into... */
+            case 1:
+                dy = -dy;
+                break;
+            case 2:
+                dx = -dx;
+                break;
+            }
+            tmpsym_change(tsym, zapdir_to_effect(dx, dy, abstype));
+        }
+    }
+#endif
+
+    if (range > 1 && (dx != 0 || dy != 0))
+    {
+        return buzz(spell, origin, cur_x + dx, cur_y + dy, dx, dy, dz,
+                    num_dice, range - 1, tracer);
+    }
+    return FALSE; /* FIXME? */
+}
+
+#if 0
 /* type ==   0 to   9 : you shooting a wand */
 /* type ==  10 to  19 : you casting a spell */
 /* type ==  20 to  29 : you breathing as a monster */
@@ -3608,7 +4680,7 @@ buzz(int type, int nd, xchar sx, xchar sy, int dx, int dy)
                        ZT_DEATH ? "disintegrate" : "destroy", FALSE);
     bhitpos = save_bhitpos;
 }
-
+#endif
 
 void
 melt_ice(struct level *lev, xchar x, xchar y)
@@ -4151,14 +5223,11 @@ destroy_mitem(struct monst *mtmp, int osym, int dmgtyp)
     return tmp;
 }
 
-
 int
-resist(struct monst *mtmp, char oclass, int damage, int domsg)
+oclass_power(char oclass)
 {
-    int resisted;
-    int alev, dlev;
-
     /* attack level */
+    int alev;
     switch (oclass) {
     case WAND_CLASS:
         alev = 12;
@@ -4182,6 +5251,15 @@ resist(struct monst *mtmp, char oclass, int damage, int domsg)
         alev = u.ulevel;
         break;  /* spell */
     }
+    return alev;
+}
+
+int
+resist_power(struct monst *mtmp, int power, int damage, int domsg)
+{
+    int resisted;
+    int alev, dlev;
+
     /* defense level */
     dlev = (int)mtmp->m_lev;
     if (dlev > 50)
@@ -4208,6 +5286,12 @@ resist(struct monst *mtmp, char oclass, int damage, int domsg)
         }
     }
     return resisted;
+}
+
+int
+resist(struct monst *mtmp, char oclass, int damage, int domsg)
+{
+    return resist_power(mtmp, oclass_power(oclass), damage, domsg);
 }
 
 void
