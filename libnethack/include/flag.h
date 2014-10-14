@@ -117,7 +117,9 @@ enum pray_trouble {
     ptr_hallucinating,
     ptr_last_minor = ptr_hallucinating,
 };
-    
+
+/* Temporary symbols written on the map */
+struct tmp_sym;
 
 /* Information that is reset every time the user has a chance to give commands
    (from default_turnstate).  This is never saved in a binary save; if it needs
@@ -172,6 +174,9 @@ struct turnstate {
            space, it stops.  This should prevent any infinite run loops. */
         boolean stepped_on[COLNO][ROWNO];
     } move;
+
+    /* Squares that have temporary symbols written on them, for beams etc. */
+    struct tmp_sym *tempsym;
 };
 
 extern struct turnstate turnstate;

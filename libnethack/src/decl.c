@@ -173,6 +173,7 @@ static const struct turnstate default_turnstate = {
     .helpless_endmsgs = {},
     .pray = { .align = A_NONE, .type = pty_invalid, .trouble = ptr_invalid },
     .move = { .dx = 0, .dy = 0, .stepped_on = {} },
+    .tempsym = NULL,
 };
 
 struct turnstate turnstate;
@@ -292,6 +293,9 @@ neutral_turnstate_tasks(void)
 
     if (turnstate.move.dx || turnstate.move.dy)
         impossible("turnstate dx and dy persisted between turns");
+
+    if (turnstate.tempsym)
+        impossible("turnstate tmpsym persisted between turns");
 
     for (i = 0; i < COLNO; i++)
         for (j = 0; j < ROWNO; j++)

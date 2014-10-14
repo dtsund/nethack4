@@ -15,9 +15,6 @@
 static boolean obj_zapped;
 static int poly_zapped;
 
-static struct tmp_sym *tsym; /* TODO: Localize this shit */
-                             /* (Or maybe put it in turnstate) */
-
 /* TODO: UNIFY ID-ON-USE SOMEHOW */
 /* TODO: USE DICE TO TRACK POTENCY OF NON-DAMAGE SPELLS */
 
@@ -41,6 +38,8 @@ static boolean zap_steed(struct obj *);
 static void cancel_item(struct obj *);
 static boolean obj_shudders(struct obj *);
 static void do_osshock(struct obj *);
+static boolean buzz(enum spell_type, enum spell_source, xchar, xchar, int, int,
+                    int, int, short, boolean);
 
 static int zap_hit_check(int, int);
 static void backfire(struct obj *);
@@ -3260,7 +3259,8 @@ weffects(struct obj *obj, schar dx, schar dy, schar dz)
             dice = (otyp == WAN_MAGIC_MISSILE) ? 2 : 6;
 
         if (spell != spell_no_spell)
-            buzz(spell, origin, u.ux, u.uy, dx, dy, dz, dice, spell_range, FALSE);
+            shoot_spell(spell, origin, u.ux, u.uy, dx, dy, dz, dice,
+                        spell_range, FALSE);
         else
             impossible("weffects: unexpected spell or wand");
 
@@ -4085,6 +4085,18 @@ spell_bounces(enum spell_type spell)
     }
 }
 
+boolean
+shoot_spell(enum spell_type spell, enum spell_source origin, xchar cur_x,
+            xchar cur_y, int dx, int dy, int dz, int num_dice, short range,
+            boolean tracer)
+{
+    boolean result = buzz(spell, origin, cur_x, cur_y, dx, dy, dz, num_dice,
+                          range, tracer);
+    tmpsym_end(turnstate.tempsym);
+    turnstate.tempsym = NULL;
+    return result;
+}
+
 /*
  * Buzz a given square with the given spell.  Reduce range by 1.  If range is
  * still positive, buzz the given square + (dx, dy) with the same spell
@@ -4097,7 +4109,6 @@ spell_bounces(enum spell_type spell)
  * Return value is true if it's a tracer and it's warning you about friendly
  * fire, false otherwise.
  * TODO: Audit this to make tracers have no effect and print no messages.
- * TODO: Make tmpsym work.
  * TODO: Make explosions work.
  * TODO: Audit this to make sure we never print flavor when it's null.
  * TODO: Actually, make everything pass dice into this based on caster and
@@ -4121,9 +4132,6 @@ buzz(enum spell_type spell, enum spell_source origin, xchar cur_x, xchar cur_y,
     /* First things first: handle the case where we're engulfed. */
     if (Engulfed) {
         int tmp;
-
-        /* TODO: Actually make this work with spell_type */
-        /* Perhaps zap_hit_mon should take spell_type instead of beam_type */
 
         tmp = spell_hit_mon(u.ustuck, origin, spell, num_dice);
         if (!u.ustuck)
@@ -4153,16 +4161,16 @@ buzz(enum spell_type spell, enum spell_source origin, xchar cur_x, xchar cur_y,
     /* TODO: Don't special-case digging rays. */
     if (in_bounds && (beam_type > -1 || spell == spell_dig))
     {
-        if (tsym == NULL){
+        if (turnstate.tempsym == NULL){
             if (spell == spell_dig) {
-                tsym = tmpsym_init(DISP_BEAM, dbuf_effect(E_MISC, E_digbeam));
+                turnstate.tempsym = tmpsym_init(DISP_BEAM, dbuf_effect(E_MISC, E_digbeam));
             } else {
-                tsym = tmpsym_init(DISP_BEAM,
+                turnstate.tempsym = tmpsym_init(DISP_BEAM,
                                    zapdir_to_effect(dx, dy, beam_type));
             }
-            tmpsym_at(tsym, cur_x, cur_y);
-            win_delay_output();     /* wait a little bit */
         }
+        tmpsym_at(turnstate.tempsym, cur_x, cur_y);
+        win_delay_output();     /* wait a little bit */
     }
 
     /* Affect the things currently on the square. */

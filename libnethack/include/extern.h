@@ -1987,8 +1987,8 @@ extern struct monst *beam_hit(int, int, int, int,
                               boolean *);
 extern struct monst *boomhit(int, int);
 extern int burn_floor_paper(struct level *, int, int, boolean, boolean);
-extern boolean buzz(enum spell_type, enum spell_source, xchar, xchar, int, int,
-                    int, int, short, boolean);
+extern boolean shoot_spell(enum spell_type, enum spell_source, xchar, xchar,
+                           int, int, int, int, short, boolean);
 extern void melt_ice(struct level *, xchar, xchar);
 extern int zap_over_floor(xchar, xchar, int, boolean *);
 extern void fracture_rock(struct obj *);

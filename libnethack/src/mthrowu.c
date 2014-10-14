@@ -902,6 +902,7 @@ bream(struct monst *mtmp, struct monst *mdef, const struct attack *mattk)
                 }
                 // FIXME: Need to update this buzz call to use an explicit spell and
                 // explicit number of dice.
+                // Remember: use shoot_spell now, not buzz.
                 /*
                 buzz((int)(-20 - (typ - 1)), (int)mattk->damn, mtmp->mx,
                      mtmp->my, sgn(tbx), sgn(tby));*/

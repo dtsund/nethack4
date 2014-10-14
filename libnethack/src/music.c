@@ -404,8 +404,8 @@ do_improvisation(struct obj *instr, const struct nh_cmd_arg *arg)
                                                         spell_cold_bolt:
                                                         spell_fire_bolt);
                 int range = get_spell_range(spell, FALSE);
-                buzz(spell, source_player_wand, u.ux, u.uy, dx, dy, 0, 12,
-                     range, FALSE);
+                shoot_spell(spell, source_player_wand, u.ux, u.uy, dx, dy, 0,
+                            12, range, FALSE);
             }
             makeknown(instr->otyp);
             break;

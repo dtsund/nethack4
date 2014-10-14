@@ -1119,9 +1119,10 @@ do_storms(void)
             dirx = rn2(3) - 1;
             diry = rn2(3) - 1;
             if (dirx != 0 || diry != 0)
-                buzz(spell_lightning_bolt, source_monster_spell, x, y, dirx,
-                     diry, 0, 8, get_spell_range(spell_lightning_bolt, FALSE),
-                     FALSE);
+                shoot_spell(spell_lightning_bolt, source_monster_spell, x, y,
+                            dirx, diry, 0, 8,
+                            get_spell_range(spell_lightning_bolt, FALSE),
+                            FALSE);
         }
     }
 

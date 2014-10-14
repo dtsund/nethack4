@@ -1283,6 +1283,7 @@ use_offensive(struct monst *mtmp, struct musable *m)
         m_using = TRUE;
         // FIXME: Need to update this buzz call to use an explicit spell and
         // explicit number of dice.
+        // Also: use shoot_spell now, not buzz.
         /*
         buzz((int)(-30 - (otmp->otyp - WAN_MAGIC_MISSILE)),
              (otmp->otyp == WAN_MAGIC_MISSILE) ? 2 : 6, mtmp->mx, mtmp->my,

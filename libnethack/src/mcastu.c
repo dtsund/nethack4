@@ -848,6 +848,7 @@ buzzmu(struct monst *mtmp, const struct attack *mattk)
                       flash_types[ad_to_typ(mattk->adtyp)]);
             // FIXME: Need to update this buzz call to use an explicit spell and
             // explicit number of dice.
+            // Remember: use shoot_spell now, not buzz.
             /*
             buzz(-ad_to_typ(mattk->adtyp), (int)mattk->damn, mtmp->mx, mtmp->my,
                  sgn(tbx), sgn(tby));*/

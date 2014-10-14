@@ -803,6 +803,7 @@ dobreathe(const struct nh_cmd_arg *arg)
     else
         // FIXME: Need to update this buzz call to use an explicit spell and
         // explicit number of dice.
+        // Also: use shoot_spell.
         /*
         buzz((int)(20 + mattk->adtyp - 1), (int)mattk->damn, u.ux, u.uy, dx,
              dy);*/
