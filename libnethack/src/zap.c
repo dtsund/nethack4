@@ -4090,8 +4090,9 @@ shoot_spell(enum spell_type spell, enum spell_source origin, xchar cur_x,
             xchar cur_y, int dx, int dy, int dz, int num_dice, short range,
             boolean tracer)
 {
-    boolean result = buzz(spell, origin, cur_x, cur_y, dx, dy, dz, num_dice,
-                          range, tracer);
+    /* Start at (cur_x+dx, cur_y+dy); (cur_x, cur_y) is the spell's source. */
+    boolean result = buzz(spell, origin, cur_x+dx, cur_y+dy, dx, dy, dz,
+                          num_dice, range, tracer);
     tmpsym_end(turnstate.tempsym);
     turnstate.tempsym = NULL;
     return result;
