@@ -4119,7 +4119,6 @@ boolean
 buzz(enum spell_type spell, enum spell_source origin, xchar cur_x, xchar cur_y,
      int dx, int dy, int dz, int num_dice, short range, boolean tracer)
 {
-    struct rm *loc;
     boolean bounce = FALSE;
     boolean in_bounds = TRUE;
     boolean shop_damage = FALSE;
@@ -4179,10 +4178,11 @@ buzz(enum spell_type spell, enum spell_source origin, xchar cur_x, xchar cur_y,
     if (in_bounds) {
         if (spell == spell_dig) {
             range += zap_dig(cur_x, cur_y, dz, &shop_damage);
-        } 
-        /*else if ((loc = &level->locations[cur_x][cur_y])->typ)*/
-        /* TODO: Walls */
-        range += zap_over_floor(cur_x, cur_y, beam_type, &shop_damage);
+        } else if (IS_ROCK((&level->locations[cur_x][cur_y])->typ)) {
+            bounce = TRUE;
+        } else {
+            range += zap_over_floor(cur_x, cur_y, beam_type, &shop_damage);
+        }
     }
 
     struct monst *mon = NULL;
@@ -4355,55 +4355,66 @@ buzz(enum spell_type spell, enum spell_source origin, xchar cur_x, xchar cur_y,
     }
 
 
-    /* Now propagate the beam, if necessary. */
-    /* Do we need to bounce? */
-    /* TODO: Make this, uh, work. */
-#if 0
+    /* Now propagate the beam, if necessary.  Do we need to bounce? */
     if (bounce)
     {
-        if (type == ZT_SPELL(ZT_FIRE)) {
-            sx = lsx;
-            sy = lsy;
-            break;  /* fireballs explode before the wall */
-        }
         bounce = 0;
         range--;
-        if (range && isok(lsx, lsy) && cansee(lsx, lsy))
+        if (range && isok(cur_x, cur_y) && cansee(cur_x, cur_y))
             pline("%s bounces!", The(flavor));
-        if (!dx || !dy || !rn2(20)) {
+        /* If we're only traveling horizontally or vertically, always reflect
+           back the way it came.
+           The old code had a 1/20 chance of it going back the way it came
+           anyway, but replicating this would play merry hell with tracers
+           and warnings, so this behavior is omitted here.
+           I doubt anyone will care. -dtsund 08/16/14 */
+        if (dx == 0 || dy == 0) {
             dx = -dx;
             dy = -dy;
         } else {
-            if (isok(sx, lsy) &&
-                ZAP_POS(rmn = level->locations[sx][lsy].typ) &&
-                !closed_door(level, sx, lsy) &&
-                (IS_ROOM(rmn) ||
-                 (isok(sx + dx, lsy) &&
-                  ZAP_POS(level->locations[sx + dx][lsy].typ))))
-                bounce = 1;
-            if (isok(lsx, sy) &&
-                ZAP_POS(rmn = level->locations[lsx][sy].typ) &&
-                !closed_door(level, lsx, sy) &&
-                (IS_ROOM(rmn) ||
-                 (isok(lsx, sy + dy) &&
-                  ZAP_POS(level->locations[lsx][sy + dy].typ))))
-                if (!bounce || rn2(2))
-                    bounce = 2;
-
-            switch (bounce) {
-            case 0:
-                dx = -dx;   /* fall into... */
-            case 1:
-                dy = -dy;
-                break;
-            case 2:
-                dx = -dx;
-                break;
+            /* Warning: This code assumes the beam came from outside a wall.
+             * This obviously won't always be true (players polymorphed into
+             * xorns can phase into walls and cast from there, for instance),
+             * but I don't think there's necessarily any sane way to bounce
+             * bolts in the inside-wall to inside-wall case anyway.
+             *
+             * The beam will be approaching the wall like this (up to rotation):
+             *
+             *  ########
+             *  2#######
+             *  1#######
+             *  /34#####
+             *
+             * where / is where the beam came from, the # right in front of it
+             * is the spell's current location, and 1, 2, 3, and 4 might be
+             * walls.  If 3 is a wall and 1 is not, we want the spell directed 
+             * to 2 (that is, invert dx before sending it on).  If 1 is a wall
+             * and 3 is not, we want the spell directed to 4 (invert dy).
+             * Otherwise, we send it back whence it came (invert both).
+             */
+            boolean invert_x = FALSE;
+            boolean invert_y = FALSE;
+            if (isok(cur_x-dx, cur_y) &&
+                !IS_ROCK((&level->locations[cur_x-dx][cur_y])->typ)) {
+                invert_x = TRUE;
             }
-            tmpsym_change(tsym, zapdir_to_effect(dx, dy, abstype));
+            if (isok(cur_x, cur_y-dy) &&
+                !IS_ROCK((&level->locations[cur_x][cur_y-dy])->typ)) {
+                invert_y = TRUE;
+            }
+            if (!invert_x && !invert_y) {
+                invert_x = TRUE;
+                invert_y = TRUE;
+            }
+            if (invert_x)
+                dx = -dx;
+            if (invert_y)
+                dy = -dy;
+            tmpsym_change(turnstate.tempsym,
+                          zapdir_to_effect(dx, dy, beam_type));
         }
     }
-#endif
+
 
     if (range > 1 && (dx != 0 || dy != 0))
     {
