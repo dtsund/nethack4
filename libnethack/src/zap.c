@@ -23,6 +23,7 @@ extern boolean notonhead;       /* for long worms */
 /* kludge to use mondied instead of killed */
 extern boolean m_using;
 
+static int get_spell_book(enum spell_type);
 static int spell_hit_mon(struct monst *, enum spell_source, enum spell_type,
                          int);
 static int spell_to_zap_type(enum spell_type);
@@ -41,7 +42,7 @@ static void do_osshock(struct obj *);
 static boolean buzz(enum spell_type, enum spell_source, xchar, xchar, int, int,
                     int, int, short, boolean);
 
-static int zap_hit_check(int, int);
+static int zap_hit_check(int, boolean, int);
 static void backfire(struct obj *);
 static int spell_hit_bonus(int);
 
@@ -184,6 +185,99 @@ enum spell_type otyp_to_spell(int otyp)
     }
     return spell_no_spell;
 }
+
+int get_spell_book(enum spell_type spell)
+{
+
+    switch (spell) {
+    case spell_cancellation:
+        return SPE_CANCELLATION;
+    case spell_cause_fear:
+        return SPE_CAUSE_FEAR;
+    case spell_charm_monster:
+        return SPE_CHARM_MONSTER;
+    case spell_clairvoyance:
+        return SPE_CLAIRVOYANCE;
+    case spell_create_familiar:
+        return SPE_CREATE_FAMILIAR;
+    case spell_create_monster:
+        return SPE_CREATE_MONSTER;
+    case spell_cone_of_cold:
+        return SPE_CONE_OF_COLD;
+    case spell_confuse_monster:
+        return SPE_CONFUSE_MONSTER;
+    case spell_cure_blindness:
+        return SPE_CURE_BLINDNESS;
+    case spell_cure_sickness:
+        return SPE_CURE_SICKNESS;
+    case spell_detect_food:
+        return SPE_DETECT_FOOD;
+    case spell_detect_monsters:
+        return SPE_DETECT_MONSTERS;
+    case spell_detect_treasure:
+        return SPE_DETECT_TREASURE;
+    case spell_detect_unseen:
+        return SPE_DETECT_UNSEEN;
+    case spell_dig:
+        return SPE_DIG;
+    case spell_drain_life:
+        return SPE_DRAIN_LIFE;
+    case spell_extra_healing:
+        return SPE_EXTRA_HEALING;
+    case spell_finger_of_death:
+        return SPE_FINGER_OF_DEATH;
+    case spell_fireball:
+        return SPE_FIREBALL;
+    case spell_force_bolt:
+        return SPE_FORCE_BOLT;
+    case spell_haste_self:
+        return SPE_HASTE_SELF;
+    case spell_healing:
+        return SPE_HEALING;
+    case spell_identify:
+        return SPE_IDENTIFY;
+    case spell_invisibility:
+        return SPE_INVISIBILITY;
+    case spell_jumping:
+        return SPE_JUMPING;
+    case spell_knock:
+        return SPE_KNOCK;
+    case spell_levitation:
+        return SPE_LEVITATION;
+    case spell_light:
+        return SPE_LIGHT;
+    case spell_magic_mapping:
+        return SPE_MAGIC_MAPPING;
+    case spell_magic_missile:
+        return SPE_MAGIC_MISSILE;
+    case spell_polymorph:
+        return SPE_POLYMORPH;
+    case spell_protection:
+        return SPE_PROTECTION;
+    case spell_restore_ability:
+        return SPE_RESTORE_ABILITY;
+    case spell_remove_curse:
+        return SPE_REMOVE_CURSE;
+    case spell_sleep:
+        return SPE_SLEEP;
+    case spell_slow_monster:
+        return SPE_SLOW_MONSTER;
+    case spell_stone_to_flesh:
+        return SPE_STONE_TO_FLESH;
+    case spell_teleport_away:
+        return SPE_TELEPORT_AWAY;
+    case spell_turn_undead:
+        return SPE_TURN_UNDEAD;
+    case spell_wizard_lock:
+        return SPE_WIZARD_LOCK;
+    default:
+        if (spell >= spell_first_book && spell <= spell_last_book)
+            impossible("get_spell_book failed to find a book for %d", spell);
+        return 0;
+    }
+    return 0;
+}
+
 
 int get_spell_range(enum spell_type spell, boolean tracer)
 {
@@ -4045,10 +4139,10 @@ burn_floor_paper(struct level *lev, int x, int y,
 
 /* will zap/spell/breath attack score a hit against armor class `ac'? */
 static int
-zap_hit_check(int ac, int type)
+zap_hit_check(int ac, boolean player_cast, int type)
 {       /* either hero cast spell type or 0 */
     int chance = rn2(20);
-    int spell_bonus = type ? spell_hit_bonus(type) : 0;
+    int spell_bonus = player_cast ? spell_hit_bonus(type) : 0;
 
     /* small chance for naked target to avoid being hit */
     if (!chance)
@@ -4196,7 +4290,9 @@ buzz(enum spell_type spell, enum spell_source origin, xchar cur_x, xchar cur_y,
             action_interrupted();
             if (u.usteed && !rn2(3) && !mon_reflects(u.usteed, NULL)) {
                 mon = u.usteed;
-            } else if (zap_hit_check((int)get_player_ac(), 0)) {
+            } else if (zap_hit_check((int)get_player_ac(), 
+                       (origin == source_player_spell),
+                       get_spell_book(spell))) {
                 /* TODO: Don't assume the spell checks AC. */
                 range -= 2;
                 if (flavor != NULL)
@@ -4234,8 +4330,10 @@ buzz(enum spell_type spell, enum spell_source origin, xchar cur_x, xchar cur_y,
 
         if (mon != NULL) {
             /* We're buzzing a monster. */
-            if (origin >= source_first_player && origin <= source_last_player) {
+            if (origin >= source_first_player && origin <= source_last_player)
                 mon->mstrategy &= ~STRAT_WAITMASK;
+            if (zap_hit_check(find_mac(mon), (origin == source_player_spell),
+                get_spell_book(spell))) {
                 /* TODO: Something something spell_reflectable */
                 if (mon_reflects(mon, NULL)) {
                     if (cansee(mon->mx, mon->my)) {
